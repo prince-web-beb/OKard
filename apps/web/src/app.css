@@ -305,3 +305,30 @@ em { font-weight: 400; color: var(--gold-pale); }
   .lab-actions button { font-size: 11px; }
   .artwork-stage svg { filter: drop-shadow(0 8px 13px rgba(0,0,0,.24)); }
 }
+
+.lab-import-control {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 8px;
+  padding: 11px 14px;
+  color: #ded9cf;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid var(--line);
+  cursor: pointer;
+  background: #181b21;
+  text-align: center;
+}
+.lab-import-control:hover { background: #26262a; }
+.lab-import-control:focus-within { outline: 3px solid #e4c07a; outline-offset: 3px; }
+.lab-import-control input[type='file'] {
+  position: absolute;
+  width: 1px; height: 1px;
+  opacity: 0;
+  pointer-events: none;
+}
+@media (max-width: 480px) {
+  .lab-import-control { font-size: 11px; }
+}
