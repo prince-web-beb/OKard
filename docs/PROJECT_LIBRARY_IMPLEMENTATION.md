@@ -52,6 +52,14 @@ Published internal contracts:
 - No government-issued credentials, simulated live issuer validation, payments, functional QR/access keys or cloud storage/identity checks.
 - Browser site data may be evicted or cleared by users/OS. **JSON export remains the only backup** until future encrypted authenticated cloud project storage exists.
 
+## Later hardening at this checkpoint
+
+- Project list retrieval now **streams IndexedDB records via an updatedAt index cursor** instead of `getAll()`, avoiding materializing up to 200 × 500KiB scene records simultaneously in browser memory. Visible preview scenes are fetched separately (initially 12).
+- The `/projects` Create button now reacts to `IndexedDB` initialization (`$state.raw`) instead of potentially remaining disabled due to a nonreactive closure.
+- The shared editor includes a visible **Unsaved changes / Saved on this device** indicator for open projects, based on scene revision versus the saved project revision.
+- `apps/web/src/routes/projects/projects.test.ts` adds gallery-to-project/scene tests for all 21 seeded choices (18 family designs + 3 HAMAD editions), stale-tab conflict, duplicated preview SVG namespace, and bad-family rejection. **Committed, not run.**
+- The page searches the metadata of **all 200 possible saved entries**, but loads full scenes only for visible rows. Test Android memory after a real connected build.
+
 ## Tests added in source
 
 `packages/project-library/tests/projects.test.mjs` covers:
