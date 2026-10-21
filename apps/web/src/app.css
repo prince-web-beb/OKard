@@ -929,3 +929,15 @@ em { font-weight: 400; color: var(--gold-pale); }
   .projects-create,.projects-library{padding:18px;}
   .project-card-options button{font-size:11px;}
 }
+
+
+.lab-project-state {
+  margin:17px 0 3px; padding:12px 15px;
+  font-size:12px;line-height:1.65;
+  color:#c5e3cd;background:rgba(91,143,110,.09);
+  border:1px solid rgba(121,178,133,.25);border-radius:9px;
+}
+.lab-project-state.unsaved {
+  color:#f1d5a9;background:rgba(202,146,61,.1);
+  border-color:rgba(212,164,96,.36);
+}
