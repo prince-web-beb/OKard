@@ -167,7 +167,7 @@
     panX = 0;
     panY = 0;
   }
-  function change(command: EditCommand) {
+  function change(command: EditCommand): boolean {
     try {
       const updated = applyCardCommand(card, command);
       undoHistory = [...undoHistory.slice(-39), card];
@@ -175,8 +175,10 @@
       card = updated;
       errorText = '';
       notice = '';
+      return true;
     } catch (error) {
       errorText = error instanceof Error ? error.message : 'This edit could not be applied.';
+      return false;
     }
   }
   function undo() {
@@ -219,6 +221,58 @@
     change({ kind: 'move', side, nodeId: selectedLayer.id,
       xMm: axis === 'xMm' ? value : selectedLayer.xMm,
       yMm: axis === 'yMm' ? value : selectedLayer.yMm });
+  }
+  function newLayerId(prefix: string): string {
+    return prefix + '-' + crypto.randomUUID().replaceAll('-', '').slice(0, 18);
+  }
+  function addTextLayer() {
+    const node = {
+      id: newLayerId('text'), kind: 'text' as const,
+      xMm: 8, yMm: 23, widthMm: 42, heightMm: 7,
+      opacity: 1, rotationDeg: 0, visible: true, locked: false,
+      text: 'YOUR TEXT', fill: '#f4ecd9',
+      fontFamily: 'Arial' as const, fontSizeMm: 4.4,
+      fontWeight: 600 as const, letterSpacingMm: 0,
+      align: 'start' as const,
+    };
+    if (change({ kind: 'insert', side, node })) {
+      layerId = node.id;
+      notice = 'A text layer was added to this side.';
+    }
+  }
+  function addShapeLayer() {
+    const node = {
+      id: newLayerId('shape'), kind: 'rectangle' as const,
+      xMm: 18, yMm: 18, widthMm: 24, heightMm: 10,
+      opacity: 0.82, rotationDeg: 0, visible: true, locked: false,
+      fill: '#d7b67b', cornerRadiusMm: 1.2,
+    };
+    if (change({ kind: 'insert', side, node })) {
+      layerId = node.id;
+      notice = 'A shape was added to this side.';
+    }
+  }
+  function editSize(axis: 'widthMm' | 'heightMm', value: string) {
+    if (!selectedLayer || !value.trim()) return;
+    const n = Number(value);
+    if (!Number.isFinite(n)) return;
+    change({ kind: 'resize', side, nodeId: selectedLayer.id,
+      widthMm: axis === 'widthMm' ? n : selectedLayer.widthMm,
+      heightMm: axis === 'heightMm' ? n : selectedLayer.heightMm,
+    });
+  }
+  function duplicateSelectedLayer() {
+    if (!selectedLayer) return;
+    const newNodeId = newLayerId('copy');
+    if (change({kind:'duplicate',side,nodeId:selectedLayer.id,newNodeId})) {
+      layerId = newNodeId;
+      notice = 'A copy was added above the selected layer.';
+    }
+  }
+  function removeSelectedLayer() {
+    if (!selectedLayer || !change({kind:'remove',side,nodeId:selectedLayer.id})) return;
+    layerId = side === 'front' ? 'display-name' : 'back-motto';
+    notice = 'Layer removed. Use Undo to restore it.';
   }
   function replacePhoto(event: Event) {
     const file = (event.currentTarget as HTMLInputElement).files?.[0];
@@ -430,6 +484,10 @@
         </fieldset>
         <div class="layer-inspector">
           <span class="panel-topline">02 / PRECISE LAYER EDITING</span>
+          <div class="layer-creation">
+            <button type="button" onclick={addTextLayer}>+ Text</button>
+            <button type="button" onclick={addShapeLayer}>+ Shape</button>
+          </div>
           <label for="layerSelect">Element on the {side}</label>
           <select id="layerSelect" value={layerId}
             onchange={(e) => (layerId = e.currentTarget.value)}>
@@ -454,6 +512,53 @@
                 value={selectedLayer.text} oninput={(e) => change({kind:'replace-text',
                   side, nodeId:selectedLayer.id, text:e.currentTarget.value})} />
             {/if}
+            <div class="coordinate-editor">
+              <div><label for="layerWidth">Width · mm</label>
+                <input id="layerWidth" type="number" min="0.01" max="1000" step="0.1"
+                  value={selectedLayer.widthMm}
+                  onchange={(e) => editSize('widthMm', e.currentTarget.value)} />
+              </div>
+              <div><label for="layerHeight">Height · mm</label>
+                <input id="layerHeight" type="number" min="0.01" max="1000" step="0.1"
+                  value={selectedLayer.heightMm}
+                  onchange={(e) => editSize('heightMm', e.currentTarget.value)} />
+              </div>
+            </div>
+            <div class="coordinate-editor">
+              <div><label for="layerRotate">Rotation · °</label>
+                <input id="layerRotate" type="number" min="-360" max="360" step="1"
+                  value={selectedLayer.rotationDeg}
+                  onchange={(e) => change({kind:'rotate',side,nodeId:selectedLayer.id,
+                    rotationDeg:Number(e.currentTarget.value)})} />
+              </div>
+              {#if selectedLayer.kind !== 'image'}
+                <div><label for="layerColor">Layer color</label>
+                  <input id="layerColor" type="color" value={selectedLayer.fill}
+                    onchange={(e) => change({kind:'set-color',side,nodeId:selectedLayer.id,
+                      color:e.currentTarget.value})} />
+                </div>
+              {/if}
+            </div>
+            <label for="layerOpacity">Layer opacity · {Math.round(selectedLayer.opacity * 100)}%</label>
+            <input id="layerOpacity" type="range" min="0" max="1" step="0.05"
+              value={selectedLayer.opacity} disabled={selectedLayer.locked}
+              onchange={(e) => change({kind:'set-opacity',side,nodeId:selectedLayer.id,
+                opacity:Number(e.currentTarget.value)})} />
+            <div class="layer-actions">
+              <button type="button"
+                onclick={() => change({kind:'set-locked',side,nodeId:selectedLayer!.id,
+                  locked:!selectedLayer!.locked})}>
+                {selectedLayer.locked ? 'Unlock' : 'Lock'}
+              </button>
+              <button type="button" disabled={selectedLayer.locked}
+                onclick={() => change({kind:'reorder',side,nodeId:selectedLayer!.id,direction:'up'})}>Bring forward</button>
+              <button type="button" disabled={selectedLayer.locked}
+                onclick={() => change({kind:'reorder',side,nodeId:selectedLayer!.id,direction:'down'})}>Send backward</button>
+              <button type="button" disabled={selectedLayer.locked}
+                onclick={duplicateSelectedLayer}>Duplicate</button>
+              <button class="layer-delete" type="button" disabled={selectedLayer.locked}
+                onclick={removeSelectedLayer}>Remove</button>
+            </div>
           {/if}
         </div>
         {#if errorText}<p role="alert" class="field-error lab-feedback">{errorText}</p>{/if}
