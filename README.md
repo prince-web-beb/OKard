@@ -16,6 +16,12 @@ A new **`/templates`** route now provides **18 original, separate card-family de
 
 **This is not account storage or cloud sync.** Clearing this browser's data can remove projects; export editable JSON separately. The code has been committed, but no successful complete app build/Android persistence E2E has yet been observed. See [Device Project Library Implementation](docs/PROJECT_LIBRARY_IMPLEMENTATION.md).
 
+## New: Secure Account + Cloud Project Synchronization (feature-gated source)
+
+Added configurable `/account` and `/auth/callback` using **OIDC Authorization Code + PKCE**, plus the Hono `/api/v1/cloud/projects` CRUD endpoints and manual cloud backup/download inside `/projects`. The backend validates signed OIDC API access tokens (issuer, audience, signature, lifetime, subject), enforces owner-scoped Postgres queries **and forced RLS**, uses transaction-safe version checks, audit records, and shared minute quotas. The server rejects anonymous requests and returns HTTP 503 while cloud configuration is absent. Cloud copies are **explicitly user-initiated**; differing versions need explicit overwrite confirmation. Photographs are not included in cloud scenes.
+
+**Deployment state:** these capabilities are committed **but disabled and unverified**; a real identity provider, real DB, migrations, ingress protections and release tests are still needed. See [Authenticated Cloud Implementation](docs/CLOUD_AUTH_SYNC_IMPLEMENTATION.md).
+
 ## Latest checkpoint — 21 October 2026
 
 **Worldwide phase update:** A reusable `@okard/country-data` package now contains 249 ISO 3166-1 country/territory codes with locale-aware names, BCP 47 formatting and RTL/LTR support. New Android-first `/countries` route provides search and safe design references, with actual `/lab?country=...&locale=...` metadata editing. Country-specific issuer/official ID layouts are **not** replicated. The new country code is committed but full build and Android QA remain unverified. Read `docs/WORLDWIDE_COUNTRY_REFERENCES.md`.
