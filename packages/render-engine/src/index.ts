@@ -9,6 +9,9 @@ export interface RenderOptions {
    * Preview can opt into a browser-owned blob: URL, but exported files cannot.
    */
   allowBlobPreview?: boolean;
+  /** Interactive HTML editor preview only; NEVER enable for print exports. */
+  interactive?: boolean;
+  selectedLayerId?: string;
 }
 export interface PreflightIssue {
   severity: 'warning' | 'error';
@@ -37,13 +40,14 @@ function assetHref(assetId: string, options: RenderOptions): string | null {
 function renderLayer(layer: SceneNode, side: CardSide, options: RenderOptions): string {
   if (!layer.visible) return '';
   const pos = `x="${finite(layer.xMm)}" y="${finite(layer.yMm)}" width="${finite(layer.widthMm)}" height="${finite(layer.heightMm)}"`;
+  const hit = options.interactive && !layer.locked ? `data-okard-layer="${layer.id}"` : '';
   const centerX = layer.xMm + layer.widthMm / 2;
   const centerY = layer.yMm + layer.heightMm / 2;
   const baseAttrs = `opacity="${finite(layer.opacity)}" transform="rotate(${finite(layer.rotationDeg)} ${finite(centerX)} ${finite(centerY)})"`;
   const clipId = `okard-${side}-${layer.id}`;
   if (layer.kind === 'rectangle') {
     const radius = Math.min(layer.cornerRadiusMm ?? 0, layer.widthMm / 2, layer.heightMm / 2);
-    return `<rect ${pos} rx="${finite(radius)}" fill="${layer.fill}" ${layer.stroke ? `stroke="${layer.stroke}"` : ''}
+    return `<rect ${pos} ${hit} rx="${finite(radius)}" fill="${layer.fill}" ${layer.stroke ? `stroke="${layer.stroke}"` : ''}
       ${layer.strokeWidthMm ? `stroke-width="${finite(layer.strokeWidthMm)}"` : ''} ${baseAttrs}/>`;
   }
   if (layer.kind === 'image') {
@@ -52,7 +56,7 @@ function renderLayer(layer: SceneNode, side: CardSide, options: RenderOptions): 
     const radius = Math.min(layer.cornerRadiusMm, layer.widthMm / 2, layer.heightMm / 2);
     const aspect = layer.fit === 'cover' ? 'xMidYMid slice' : 'xMidYMid meet';
     return `<defs><clipPath id="${clipId}"><rect ${pos} rx="${finite(radius)}"/></clipPath></defs>
-    <image ${pos} preserveAspectRatio="${aspect}" href="${escapeXml(href)}" clip-path="url(#${clipId})" ${baseAttrs}/>`;
+    <image ${pos} ${hit} preserveAspectRatio="${aspect}" href="${escapeXml(href)}" clip-path="url(#${clipId})" ${baseAttrs}/>`;
   }
   const font = layer.fontFamily;
   const x = layer.align === 'middle' ? layer.xMm + layer.widthMm / 2 :
@@ -60,7 +64,7 @@ function renderLayer(layer: SceneNode, side: CardSide, options: RenderOptions): 
   const y = layer.yMm + layer.fontSizeMm * 1.03;
   // Text stays semantically selectable, accessible and editable. No foreignObject or HTML.
   return `<defs><clipPath id="${clipId}"><rect ${pos}/></clipPath></defs>
-  <text x="${finite(x)}" y="${finite(y)}" fill="${layer.fill}"
+  <text ${hit} x="${finite(x)}" y="${finite(y)}" fill="${layer.fill}"
     font-family="${font}" font-size="${finite(layer.fontSizeMm)}"
     font-weight="${layer.fontWeight}" letter-spacing="${finite(layer.letterSpacingMm)}"
     text-anchor="${layer.align}" dominant-baseline="alphabetic"
@@ -76,12 +80,27 @@ export function renderCardSvg(doc: CardDocument, side: CardSide, options: Render
   const w = finite(doc.size.widthMm);
   const h = finite(doc.size.heightMm);
   const nodes = doc.artboards[side].nodes.map(n => renderLayer(n, side, options)).join('\n');
+  const selected = options.interactive && options.selectedLayerId
+    ? doc.artboards[side].nodes.find((n) => n.id === options.selectedLayerId && n.visible && !n.locked)
+    : undefined;
+  const selection = selected
+    ? `<g aria-hidden="true" pointer-events="none" transform="rotate(${finite(selected.rotationDeg)}
+        ${finite(selected.xMm + selected.widthMm / 2)} ${finite(selected.yMm + selected.heightMm / 2)})">
+        <rect x="${finite(selected.xMm)}" y="${finite(selected.yMm)}"
+          width="${finite(selected.widthMm)}" height="${finite(selected.heightMm)}"
+          fill="none" stroke="#42dfbd" stroke-width=".38" stroke-dasharray="1 .5"/>
+        <rect x="${finite(selected.xMm - 0.65)}" y="${finite(selected.yMm - 0.65)}" width="1.3" height="1.3" rx=".2" fill="#42dfbd"/>
+        <rect x="${finite(selected.xMm + selected.widthMm - 0.65)}" y="${finite(selected.yMm - 0.65)}" width="1.3" height="1.3" rx=".2" fill="#42dfbd"/>
+        <rect x="${finite(selected.xMm - 0.65)}" y="${finite(selected.yMm + selected.heightMm - 0.65)}" width="1.3" height="1.3" rx=".2" fill="#42dfbd"/>
+        <rect x="${finite(selected.xMm + selected.widthMm - 0.65)}" y="${finite(selected.yMm + selected.heightMm - 0.65)}" width="1.3" height="1.3" rx=".2" fill="#42dfbd"/>
+      </g>`
+    : '';
   return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"
     width="${w}mm" height="${h}mm" viewBox="0 0 ${w} ${h}" role="img"
     aria-label="${escapeXml(doc.title + ' ' + side)}">
     <title>${escapeXml(doc.title + ' · ' + side + ' design study')}</title>
     <defs><clipPath id="okard-artboard-clip"><rect width="${w}" height="${h}" rx="3.2"/></clipPath></defs>
-    <g clip-path="url(#okard-artboard-clip)">${nodes}</g>
+    <g clip-path="url(#okard-artboard-clip)">${nodes}${selection}</g>
   </svg>`;
 }
 
