@@ -40,6 +40,7 @@
       <a href="/countries">Worldwide</a>
       <a href="/lab">Design studio</a>
       <a href="/projects">My Projects</a>
+      <a href="/account">Account</a>
     </nav>
     <a class="lab-back" href="/">← Home</a>
   </header>
