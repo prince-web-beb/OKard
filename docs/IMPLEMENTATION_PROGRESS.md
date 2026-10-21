@@ -31,6 +31,16 @@
 
 **Relevant architecture:** `docs/AI_PROVIDER_ROUTING.md` and `docs/adr/0002-openrouter-primary-gemini-secondary.md`.
 
+## 2026-10-21 — REUSABLE SCENE GRAPH + SVG EDITOR CHECKPOINT
+
+**Written and committed to GitHub main:** `packages/design-schema` versioned dual-sided physical-mm `CardDocument`, runtime validation, safe node types, immutable edit commands, JSON serialization/import, HAMAD three-edition private-brand templates; `packages/render-engine` reusable SVG renderer with XML-escaped text, strict supported embedded images, client-only blob preview, portable export and preflight warnings. The Android-first `/lab` route now renders these scene documents, supports front/back, edit name, select and move layers by numeric mm coordinates, adjust background portrait opacity, upload/remove local portrait, undo/redo, SVG export and private-brand scene JSON download/import. Both packages have checked-in Node test suites. See `docs/SCENE_GRAPH_IMPLEMENTATION.md`.
+
+**Verified in this session:** GitHub write operations confirmed. Implementation files are present in git history; package build/test and actual Android UI have NOT been run. `/lab` is a **nonpersistent development preview**, not a complete production editor. No personal photos committed, no deployment claimed.
+
+**Remaining validation blockers:** Online `pnpm install`/lockfile, full `pnpm build` and `pnpm check`, Node unit suites, browser/Android E2E, GitHub Actions `startup_failure` with no jobs, and Replit sync.
+
+**Track state:** Track 03 foundation partly implemented, Track 04 and 05 partly implemented, **all 19 track-level VERIFIED checkboxes remain unchecked**. Track 00.1 is still the next *verification* gate. Continue remaining tools and data workflows only after build confidence improves.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
