@@ -132,6 +132,8 @@
     node.id === 'secondary-portrait'));
   const secondaryOpacity = $derived(secondaryLayer?.opacity ?? 0.12);
   const activeManifest = $derived(activeTemplateId ? getTemplate(activeTemplateId) : null);
+  const hasUnsavedProjectEdits = $derived(Boolean(currentProject &&
+    card.revision !== currentProject.design.revision));
   const portraitSupported = $derived(['front', 'back'].some((name) =>
     card.artboards[name as CardSide].nodes.some((node) =>
       node.kind === 'image' && node.assetId === 'portrait')));
@@ -587,6 +589,15 @@
           <button type="button" class:active={side === 'back'} aria-pressed={side === 'back'}
             onclick={() => chooseSide('back')}>Back</button>
         </div>
+        {#if projectLoading}
+          <p class="lab-project-state" role="status">Opening saved project from this device…</p>
+        {:else if currentProject}
+          <p class:unsaved={hasUnsavedProjectEdits} class="lab-project-state" role="status">
+            {hasUnsavedProjectEdits
+              ? '● Unsaved changes. Select Save project on device to keep them.'
+              : '✓ This project matches its saved device version.'}
+          </p>
+        {/if}
         <div class="lab-actions" role="group" aria-label="Edit and export controls">
           <button type="button" class="lab-project-save" disabled={projectBusy || projectLoading}
             onclick={() => void saveAsProject()}>
