@@ -12,6 +12,11 @@ describe('Hono foundation routes', () => {
     const data = await response.json();
     expect(response.status).toBe(200);
     expect(data.issuedCredentialsEnabled).toBe(false);
+    expect(data.ai).toEqual({
+      primary: 'openrouter',
+      secondary: 'google',
+      publicAccessEnabled: false,
+    });
   });
   it('returns an explicit 404 error', async () => {
     const response = await app.request('/missing');
