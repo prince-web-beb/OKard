@@ -224,6 +224,7 @@
     <nav class="projects-header-nav" aria-label="Projects navigation">
       <a href="/templates">Templates</a>
       <a href="/countries">Worldwide</a>
+      <a href="/account">Account</a>
     </nav>
     <a class="lab-back" href="/">← Home</a>
   </header>
