@@ -267,10 +267,22 @@ export function createBrowserProjectRepository(): ProjectRepository {
   return {
     async list() {
       return run('readonly',(store,done,fail)=>{
-        const request=store.getAll();
+        // Cursor streaming avoids materializing 200 full 500-KiB scenes in memory.
+        const views: ProjectListItem[] = [];
+        const request=store.index('updatedAt').openCursor(null,'prev');
         request.onsuccess=()=>{
-          try {done(listViews((request.result as LocalProject[]).map(validateRecord)));}
-          catch {fail(new ProjectLibraryError('STORAGE_ERROR','Saved project data was invalid.'));}
+          const cursor=request.result;
+          if(!cursor) {
+            done(views.sort((a,b) =>
+              b.updatedAt.localeCompare(a.updatedAt) || a.id.localeCompare(b.id)));
+            return;
+          }
+          try {
+            views.push(localView(validateRecord(cursor.value as LocalProject)));
+            cursor.continue();
+          } catch {
+            fail(new ProjectLibraryError('STORAGE_ERROR','Saved project data was invalid.'));
+          }
         };
       });
     },
