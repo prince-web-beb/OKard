@@ -213,7 +213,7 @@ export function createEmptyCardDocument(options: {
     id: options.id,
     title: options.title,
     family: options.family,
-    locale: options.locale ?? 'en',
+    locale: normalizeLocale(options.locale ?? 'en'),
     countryCode: options.countryCode ?? null,
     updatedAt: options.now ?? new Date().toISOString(),
     revision: 0,
