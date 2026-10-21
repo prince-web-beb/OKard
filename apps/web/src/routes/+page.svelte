@@ -25,6 +25,7 @@
       <a href="/templates">Templates</a>
       <a href="/lab">Design lab</a>
       <a href="/projects">My Projects</a>
+      <a href="/account">Account</a>
     </nav>
     <a class="topbar-cta" href="/projects">My Projects <span aria-hidden="true">↗</span></a>
   </header>
