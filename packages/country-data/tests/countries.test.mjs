@@ -44,11 +44,14 @@ test('locale direction and globalized dates/numbers are explicit', () => {
   assert.equal(localeDirection('en-US'), 'ltr');
   assert.equal(localeDirection('fr'), 'ltr');
   assert.equal(localeDirection('en-Arab'), 'rtl');
+  assert.equal(localeDirection('ar-Latn'), 'ltr');
+  assert.equal(localeDirection('zh-Hant-TW'), 'ltr');
   const preview = createLocalePreview('fr-BE');
   assert.equal(preview.resolvedLocale, 'fr-BE');
   assert.ok(preview.sampleDate);
   assert.ok(preview.sampleNumber);
   assert.equal(normalizeLocale('x--x'), 'en');
+  assert.equal(normalizeLocale('zh-Hant-TW-u-ca-gregory'), 'zh-Hant-TW-u-ca-gregory');
 });
 test('no country code is inferred from user name or IP; list can be bounded', () => {
   const references = listCountryReferences('en', { limit: 4 });

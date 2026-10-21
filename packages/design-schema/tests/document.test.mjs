@@ -163,3 +163,15 @@ test('invalid ISO references are rejected and do not mutate original', () => {
   assert.equal(original.countryCode,null);
   assert.equal(original.revision,0);
 });
+
+test('extended canonical BCP 47 locales survive JSON roundtrip', () => {
+  const original = createHamadCardDocument('future');
+  const complex = applyCardCommand(original, {
+    kind:'set-locale', locale:'zh-Hant-TW-u-ca-gregory',
+  });
+  assert.equal(parseCardDocument(serializeCardDocument(complex)).locale,
+    'zh-Hant-TW-u-ca-gregory');
+  assert.throws(() => applyCardCommand(original, {
+    kind:'set-locale', locale:'xyz--bad',
+  }), CardSchemaError);
+});
