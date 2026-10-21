@@ -37,14 +37,14 @@ function assetHref(assetId: string, options: RenderOptions): string | null {
   if (options.allowBlobPreview && blobImage.test(value)) return value;
   return null;
 }
-function renderLayer(layer: SceneNode, side: CardSide, options: RenderOptions): string {
+function renderLayer(layer: SceneNode, side: CardSide, options: RenderOptions, namespace: string): string {
   if (!layer.visible) return '';
   const pos = `x="${finite(layer.xMm)}" y="${finite(layer.yMm)}" width="${finite(layer.widthMm)}" height="${finite(layer.heightMm)}"`;
   const hit = options.interactive && !layer.locked ? `data-okard-layer="${layer.id}"` : '';
   const centerX = layer.xMm + layer.widthMm / 2;
   const centerY = layer.yMm + layer.heightMm / 2;
   const baseAttrs = `opacity="${finite(layer.opacity)}" transform="rotate(${finite(layer.rotationDeg)} ${finite(centerX)} ${finite(centerY)})"`;
-  const clipId = `okard-${side}-${layer.id}`;
+  const clipId = `okard-${namespace}-${side}-${layer.id}`;
   if (layer.kind === 'rectangle') {
     const radius = Math.min(layer.cornerRadiusMm ?? 0, layer.widthMm / 2, layer.heightMm / 2);
     return `<rect ${pos} ${hit} rx="${finite(radius)}" fill="${layer.fill}" ${layer.stroke ? `stroke="${layer.stroke}"` : ''}
@@ -79,7 +79,8 @@ export function renderCardSvg(doc: CardDocument, side: CardSide, options: Render
   if (side !== 'front' && side !== 'back') throw new Error('Invalid card side');
   const w = finite(doc.size.widthMm);
   const h = finite(doc.size.heightMm);
-  const nodes = doc.artboards[side].nodes.map(n => renderLayer(n, side, options)).join('\n');
+  const namespace = doc.id;
+  const nodes = doc.artboards[side].nodes.map(n => renderLayer(n, side, options, namespace)).join('\n');
   const selected = options.interactive && options.selectedLayerId
     ? doc.artboards[side].nodes.find((n) => n.id === options.selectedLayerId && n.visible && !n.locked)
     : undefined;
@@ -99,8 +100,8 @@ export function renderCardSvg(doc: CardDocument, side: CardSide, options: Render
     width="${w}mm" height="${h}mm" viewBox="0 0 ${w} ${h}" role="img"
     aria-label="${escapeXml(doc.title + ' ' + side)}">
     <title>${escapeXml(doc.title + ' · ' + side + ' design study')}</title>
-    <defs><clipPath id="okard-artboard-clip"><rect width="${w}" height="${h}" rx="3.2"/></clipPath></defs>
-    <g clip-path="url(#okard-artboard-clip)">${nodes}${selection}</g>
+    <defs><clipPath id="okard-artboard-${namespace}-${side}"><rect width="${w}" height="${h}" rx="3.2"/></clipPath></defs>
+    <g clip-path="url(#okard-artboard-${namespace}-${side})">${nodes}${selection}</g>
   </svg>`;
 }
 
