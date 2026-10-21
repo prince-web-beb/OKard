@@ -326,7 +326,7 @@ function compositionLayers(spec: TemplateManifest, side: 'front' | 'back'): Scen
 }
 function fontPosition(spec: TemplateManifest): { brandX:number; brandY:number; titleX:number; titleY:number; nameX:number; nameY:number; max:number } {
   switch(spec.composition) {
-    case 'portrait-left': return {brandX:6,brandY:4,titleX:39,nameX:39,brandY:4,titleY:20,nameY:29,max:43};
+    case 'portrait-left': return {brandX:6,brandY:4,titleX:39,nameX:39,titleY:20,nameY:29,max:43};
     case 'portrait-right': return {brandX:6,brandY:5,titleX:6,titleY:19,nameX:6,nameY:29,max:45};
     case 'panorama': return {brandX:6,brandY:31,titleX:6,titleY:33,nameX:6,nameY:38,max:73};
     case 'split': return {brandX:44,brandY:5,titleX:44,titleY:17,nameX:44,nameY:29,max:39};
@@ -366,7 +366,7 @@ function foreground(spec: TemplateManifest, side: 'front' | 'back'): SceneNode[]
     const support=nodes.find((n)=>n.id==='supporting-label');
     const value=nodes.find((n)=>n.id==='supporting-value');
     if(support) support.yMm=44.2;
-    if(value){value.yMm=47.1;value.fontSizeMm=2.1;value.heightMm=2.9;}
+    if(value && value.kind==='text'){value.yMm=47.1;value.fontSizeMm=2.1;value.heightMm=2.9;}
   }
   nodes.push(
     rectangle('footer-cover',0,49.8,85.6,4.18,p.base,0.94),
