@@ -104,8 +104,9 @@ const cloudConfig = {
   jwksUrl: process.env.OKARD_OIDC_JWKS_URL?.trim() ?? '',
   databaseUrl: process.env.DATABASE_URL?.trim() ?? '',
 };
-const cloudReady = Boolean(cloudConfig.issuer && cloudConfig.audience &&
-  cloudConfig.jwksUrl && cloudConfig.databaseUrl);
+const cloudReady = process.env.OKARD_CLOUD_PROJECTS_ENABLED === 'true' &&
+  Boolean(cloudConfig.issuer && cloudConfig.audience &&
+    cloudConfig.jwksUrl && cloudConfig.databaseUrl);
 if (cloudReady) {
   const verifier = createOIDCVerifier(cloudConfig);
   const database = createCloudPool(cloudConfig.databaseUrl, {
