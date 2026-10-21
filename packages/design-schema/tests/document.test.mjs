@@ -93,3 +93,50 @@ test('editing a reactive Proxy document works without structuredClone DataCloneE
   assert.equal(edited.artboards.front.nodes.find(n => n.id === 'display-name').text, 'UPDATED');
   assert.equal(proxied.revision, 0);
 });
+
+test('shape authoring supports resize, rotation, color, stacking and duplicate with undoable revisions', () => {
+  const original = createHamadCardDocument('royal');
+  let doc = applyCardCommand(original, {
+    kind:'insert',side:'front',node:{
+      id:'custom-box',kind:'rectangle',xMm:4,yMm:4,widthMm:15,heightMm:6,
+      fill:'#ffcc88',opacity:1,rotationDeg:0,visible:true,locked:false,
+    },
+  });
+  doc = applyCardCommand(doc,{kind:'resize',side:'front',nodeId:'custom-box',widthMm:18,heightMm:8});
+  doc = applyCardCommand(doc,{kind:'rotate',side:'front',nodeId:'custom-box',rotationDeg:25});
+  doc = applyCardCommand(doc,{kind:'set-color',side:'front',nodeId:'custom-box',color:'#336699'});
+  doc = applyCardCommand(doc,{kind:'duplicate',side:'front',nodeId:'custom-box',newNodeId:'custom-copy'});
+  const copy = doc.artboards.front.nodes.find(n=>n.id==='custom-copy');
+  assert.equal(copy.kind,'rectangle');
+  assert.equal(copy.fill,'#336699');
+  assert.equal(copy.rotationDeg,25);
+  assert.equal(copy.widthMm,18);
+  const ids = doc.artboards.front.nodes.map(n=>n.id);
+  assert.equal(ids.indexOf('custom-copy'),ids.indexOf('custom-box')+1);
+  doc = applyCardCommand(doc,{kind:'reorder',side:'front',nodeId:'custom-copy',direction:'up'});
+  assert.ok(doc.artboards.front.nodes.some(n=>n.id==='custom-copy'));
+  assert.equal(original.revision,0);
+  assert.equal(doc.revision,6);
+});
+test('locking is enforced for edits but allows unlocking', () => {
+  let doc = createHamadCardDocument('royal');
+  doc = applyCardCommand(doc,{kind:'set-locked',side:'front',nodeId:'display-name',locked:true});
+  assert.throws(()=>applyCardCommand(doc,{kind:'remove',side:'front',nodeId:'display-name'}),CardSchemaError);
+  assert.throws(()=>applyCardCommand(doc,{kind:'set-color',side:'front',nodeId:'display-name',color:'#123456'}),CardSchemaError);
+  doc = applyCardCommand(doc,{kind:'set-locked',side:'front',nodeId:'display-name',locked:false});
+  doc = applyCardCommand(doc,{kind:'set-color',side:'front',nodeId:'display-name',color:'#abcdef'});
+  assert.equal(doc.artboards.front.nodes.find(n=>n.id==='display-name').fill,'#abcdef');
+});
+test('unsupported image fill, duplicate IDs and invalid resize fail atomically', () => {
+  const doc=createHamadCardDocument('future');
+  assert.throws(()=>applyCardCommand(doc,{
+    kind:'set-color',side:'front',nodeId:'main-portrait',color:'#ffffff',
+  }),CardSchemaError);
+  assert.throws(()=>applyCardCommand(doc,{
+    kind:'duplicate',side:'front',nodeId:'display-name',newNodeId:'card-type',
+  }),CardSchemaError);
+  assert.throws(()=>applyCardCommand(doc,{
+    kind:'resize',side:'front',nodeId:'display-name',widthMm:-10,heightMm:10,
+  }),CardSchemaError);
+  assert.equal(doc.revision,0);
+});
