@@ -84,6 +84,14 @@
   const displayNameLayer = $derived(card.artboards.front.nodes.find((node) =>
     node.id === 'display-name'));
   const displayName = $derived(displayNameLayer?.kind === 'text' ? displayNameLayer.text : '');
+  const secondaryTextLayer = $derived(card.artboards.front.nodes.find((node) =>
+    node.id === 'supporting-value'));
+  const secondaryText = $derived(secondaryTextLayer?.kind === 'text'
+    ? secondaryTextLayer.text : '');
+  const reverseHeadlineLayer = $derived(card.artboards.back.nodes.find((node) =>
+    node.id === 'back-motto'));
+  const reverseHeadline = $derived(reverseHeadlineLayer?.kind === 'text'
+    ? reverseHeadlineLayer.text : '');
   const secondaryLayer = $derived(card.artboards.front.nodes.find((node) =>
     node.id === 'secondary-portrait'));
   const secondaryOpacity = $derived(secondaryLayer?.opacity ?? 0.12);
@@ -545,6 +553,23 @@
           <input id="displayName" type="text" maxlength="40" spellcheck="false" autocomplete="off"
             value={displayName} oninput={(e) => change({kind: 'replace-text', side: 'front',
               nodeId: 'display-name', text: activeManifest ? e.currentTarget.value : e.currentTarget.value.toUpperCase()})} />
+        </div>
+        {#if activeManifest}
+          <div class="panel-group">
+            <label for="familySecondaryValue">{activeManifest.fields[1]?.label ?? 'Secondary detail'}</label>
+            <input id="familySecondaryValue" type="text" maxlength="120" autocomplete="off"
+              value={secondaryText}
+              oninput={(e) => change({kind:'replace-text',side:'front',
+                nodeId:'supporting-value',text:e.currentTarget.value})} />
+          </div>
+        {/if}
+        <div class="panel-group">
+          <label for="cardReverseHeadline">Back inscription</label>
+          <input id="cardReverseHeadline" type="text" maxlength="120" autocomplete="off"
+            value={reverseHeadline}
+            oninput={(e) => change({kind:'replace-text',side:'back',
+              nodeId:'back-motto',text:e.currentTarget.value})} />
+          <span class="input-hint">This updates the reverse-side text without changing the front.</span>
         </div>
         {#if portraitSupported}
         <div class="panel-group">
