@@ -77,6 +77,24 @@ const SELECT_COLUMNS = `id,name,source_template,family,design,version,created_at
 
 export function createPostgresProjectStore(pool: Pool): CloudProjectStore {
   const store:CloudProjectStore = {
+    async consumeRateLimit(owner,kind) {
+      const max = kind === 'read' ? 120 : 30;
+      return tx(pool,owner,async(client)=>{
+        // UPSERT serializes updates to the same owner-minute row across API
+        // instances. A full bucket returns zero rows (HTTP 429 at the router).
+        const result=await client.query<{used:number}>(
+          `INSERT INTO okard_cloud_rate_limits
+             (owner_issuer,owner_subject,window_start,kind,used)
+           VALUES ($1,$2,date_trunc('minute',now()),$3,1)
+           ON CONFLICT (owner_issuer,owner_subject,window_start,kind)
+           DO UPDATE SET used=okard_cloud_rate_limits.used+1
+             WHERE okard_cloud_rate_limits.used < $4
+           RETURNING used`,
+          [owner.issuer,owner.subject,kind,max],
+        );
+        return result.rows.length>0;
+      });
+    },
     async list(owner,limit,offset):Promise<CloudProjectList> {
       // The LIST response deliberately does not include any card design data.
       return tx(pool,owner,async(client)=>{
