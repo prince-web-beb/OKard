@@ -6,6 +6,7 @@
   import { createHamadCardDocument, applyCardCommand, type CardDocument,
     type EditCommand, type HamadEdition, parseCardDocument } from '@okard/design-schema';
   import { renderCardSvg, preflightCardDocument } from '@okard/render-engine';
+  import { createTemplateDocument, getTemplate, HAMAD_SHOWCASE } from '@okard/templates';
   import type { CardSide } from '@okard/shared';
   import { screenToMillimetres, movedLayerPosition, distance, center,
     nextPinchTransform, clampZoom, type MmPoint, type ScreenPoint,
@@ -16,10 +17,17 @@
     { id: 'future', title: 'Future Identity', color: '#82cde5' },
     { id: 'imperial', title: 'Imperial Edition', color: '#8a6839' }
   ];
-  const initialCard = createHamadCardDocument('royal');
+  // Every gallery card uses this same canonical editor, not a separate card-specific page.
+  const templateParam = page.url.searchParams.get('template') ?? '';
+  const initialGalleryTemplate = getTemplate(templateParam);
+  const initialHamadEdition = HAMAD_SHOWCASE.find((item) => item.id === templateParam)?.edition ?? 'royal';
+  const initialCard = initialGalleryTemplate
+    ? createTemplateDocument(initialGalleryTemplate.id)
+    : createHamadCardDocument(initialHamadEdition);
   initialCard.countryCode = normalizeCountryCode(page.url.searchParams.get('country'));
   initialCard.locale = normalizeLocale(page.url.searchParams.get('locale') ?? 'en');
-  let edition = $state<HamadEdition>('royal');
+  let edition = $state<HamadEdition>(initialHamadEdition);
+  let activeTemplateId = $state<string | null>(initialGalleryTemplate?.id ?? null);
   let side = $state<CardSide>('front');
   let card = $state<CardDocument>(initialCard);
   const supportedLocales = [
@@ -79,6 +87,10 @@
   const secondaryLayer = $derived(card.artboards.front.nodes.find((node) =>
     node.id === 'secondary-portrait'));
   const secondaryOpacity = $derived(secondaryLayer?.opacity ?? 0.12);
+  const activeManifest = $derived(activeTemplateId ? getTemplate(activeTemplateId) : null);
+  const portraitSupported = $derived(['front', 'back'].some((name) =>
+    card.artboards[name as CardSide].nodes.some((node) =>
+      node.kind === 'image' && node.assetId === 'portrait')));
   const availableCountries = $derived(listCountryReferences(card.locale));
   const selectedReference = $derived(card.countryCode
     ? getCountryReference(card.countryCode, card.locale) : null);
@@ -223,10 +235,11 @@
     layerId = next === 'front' ? 'display-name' : 'back-motto';
   }
   function chooseEdition(next: HamadEdition) {
-    if (edition === next) return;
+    if (activeTemplateId === null && edition === next) return;
     const carryName = displayName;
     resetCanvasView();
     edition = next;
+    activeTemplateId = null;
     const newCard = createHamadCardDocument(edition, carryName);
     newCard.countryCode = card.countryCode;
     newCard.locale = card.locale;
@@ -353,7 +366,7 @@
         resolveAsset: (id) => id === 'portrait' ? embedded : null
       });
       downloadBlob(svg, 'image/svg+xml;charset=utf-8',
-        'okard-hamad-' + edition + '-' + side + '.svg');
+        'okard-' + card.id + '-' + side + '.svg');
       notice = 'Portable SVG saved. This is design artwork, not a certified print file.';
       errorText = '';
     } catch (error) {
@@ -369,10 +382,15 @@
         throw new Error('Choose an OKard design JSON file below 500 KB.');
       }
       const restored = parseCardDocument(await file.text());
-      if (restored.family !== 'private-brand' || !['hamad-royal', 'hamad-future', 'hamad-imperial'].includes(restored.id)) {
-        throw new Error('This preview imports HAMAD private-brand scenes only. Other card families will be supported in the full editor.');
+      const familyTemplate = restored.id.startsWith('template-')
+        ? getTemplate(restored.id.slice('template-'.length)) : null;
+      const hamadTemplate = HAMAD_SHOWCASE.find((t) => t.id === restored.id);
+      if (!(familyTemplate && familyTemplate.family === restored.family) &&
+          !(hamadTemplate && restored.family === 'private-brand')) {
+        throw new Error('Design does not match a supported OKard catalog template.');
       }
-      edition = restored.id.replace('hamad-', '') as HamadEdition;
+      activeTemplateId = familyTemplate?.id ?? null;
+      if (hamadTemplate) edition = hamadTemplate.edition;
       card = restored;
       undoHistory = [];
       redoHistory = [];
@@ -406,7 +424,7 @@
       if (!value) throw new Error('No local draft exists for this edition on this device.');
       if (value.length > 500 * 1024) throw new Error('Saved draft is too large.');
       const restored = parseCardDocument(value);
-      if (restored.id !== card.id || restored.family !== 'private-brand') {
+      if (restored.id !== card.id || restored.family !== card.family) {
         throw new Error('This local draft belongs to another design.');
       }
       card = restored;
@@ -432,7 +450,7 @@
   function downloadScene() {
     // The document contains asset IDs but NEVER embeds the uploaded personal image.
     downloadBlob(JSON.stringify(card, null, 2), 'application/json',
-      'okard-' + edition + '-editable-scene.json');
+      'okard-' + card.id + '-editable-scene.json');
     notice = 'Editable design JSON downloaded. Personal photos are excluded.';
   }
 </script>
@@ -455,13 +473,16 @@
     <div class="lab-heading">
       <span class="eyebrow">ORIGINAL DESIGN · REAL VECTOR LAYERS</span>
       <h1>The art of <em>identity.</em></h1>
-      <p>Explore original HAMAD private-brand design directions. These are genuine editable front-and-back scene documents, not generated images. The full production editor is still being built.</p>
+      <p>Editing: <strong>{activeManifest?.name ?? 'HAMAD ' + edition + ' edition'}</strong>.
+        This {activeManifest?.family ?? 'private-brand'} card uses editable front/back vector layers.
+        The full production editor and authorized issuer workflows are still in development.</p>
+      <a href="/templates" class="lab-template-back">← Explore the complete template gallery</a>
     </div>
     <div class="studio-layout">
       <section class="preview-zone" aria-label="Live card artboard">
         <div class="preview-head">
           <span>LIVE VECTOR STUDY</span>
-          <span>85.60 × 53.98 MM · {side.toUpperCase()} · REV {card.revision}</span>
+          <span>{card.size.widthMm.toFixed(2)} × {card.size.heightMm.toFixed(2)} MM · {side.toUpperCase()} · REV {card.revision}</span>
         </div>
         <div class="svg-preview-wrap">
           <div class="artwork-stage" class:dragging={Boolean(dragging)}
@@ -520,13 +541,14 @@
           <p>Adjust original layers; changes can be undone or redone. Mobile controls are full-width and touch-friendly.</p>
         </div>
         <div class="panel-group">
-          <label for="displayName">Display name</label>
+          <label for="displayName">{activeManifest?.fields[0]?.label ?? 'Display name'}</label>
           <input id="displayName" type="text" maxlength="40" spellcheck="false" autocomplete="off"
             value={displayName} oninput={(e) => change({kind: 'replace-text', side: 'front',
-              nodeId: 'display-name', text: e.currentTarget.value.toUpperCase()})} />
+              nodeId: 'display-name', text: activeManifest ? e.currentTarget.value : e.currentTarget.value.toUpperCase()})} />
         </div>
+        {#if portraitSupported}
         <div class="panel-group">
-          <label for="portrait">Portrait</label>
+          <label for="portrait">Personal portrait (local preview)</label>
           <input id="portrait" type="file" accept="image/jpeg,image/png,image/webp"
             onchange={replacePhoto} aria-describedby="portraitHint" />
           <span class="input-hint" id="portraitHint">JPEG, PNG or WebP · max 8 MB · browser-only</span>
@@ -535,12 +557,15 @@
             <button type="button" class="text-action" onclick={removePhoto}>Remove portrait</button>
           {/if}
         </div>
+        {/if}
+        {#if secondaryLayer}
         <div class="panel-group">
           <label for="backgroundOpacity">Faded background portrait · {Math.round(secondaryOpacity * 100)}%</label>
           <input id="backgroundOpacity" type="range" min="0.03" max="0.40" step="0.01"
             value={secondaryOpacity} oninput={(e) => change({kind:'set-opacity', side:'front',
               nodeId:'secondary-portrait', opacity:Number(e.currentTarget.value)})} />
         </div>
+        {/if}
         <div class="global-editor-settings">
           <span class="panel-topline">GLOBAL REFERENCES</span>
           <p class="global-editor-description">Set the language and reference country for this original design. Neither field verifies a person's identity.</p>
@@ -567,8 +592,9 @@
           </div>
           <a href="/countries" class="global-editor-atlas">Explore all countries <span aria-hidden="true">↗</span></a>
         </div>
+        {#if activeTemplateId === null}
         <fieldset class="edition-list">
-          <legend>Choose an edition</legend>
+          <legend>Choose a HAMAD edition</legend>
           {#each editions as item (item.id)}
             <button class:chosen={edition === item.id} type="button"
               aria-pressed={edition === item.id} onclick={() => chooseEdition(item.id)}>
@@ -578,6 +604,18 @@
             </button>
           {/each}
         </fieldset>
+        {:else}
+        <div class="lab-template-card">
+          <span class="panel-topline">CARD FAMILY</span>
+          <h3>{activeManifest?.name}</h3>
+          <p>{activeManifest?.descriptor}</p>
+          {#if activeManifest?.issuerRequired}
+            <p class="lab-template-authorization">Authorized issuer approval is required for actual use.
+            This is design artwork, not an issued pass.</p>
+          {/if}
+          <a href="/templates">Choose another template ↗</a>
+        </div>
+        {/if}
         <div class="layer-inspector">
           <span class="panel-topline">02 / PRECISE LAYER EDITING</span>
           <div class="layer-creation">
