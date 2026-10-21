@@ -2,7 +2,7 @@
 
 **OKard Creator** is an Android-first, original, code-rendered card design platform in active development. One tool will eventually handle front/back design, private-brand cards, corporate cards, keepsakes, events, loyalty, and other legally issued private card families.
 
-**Deployment architecture:** Replit **primary** for web and backend; Netlify **alternative** web hosting; Google Cloud Run **secondary** API hosting; Google Gemini planned as a **secondary** AI provider. No provider is claimed deployed by these source files. **Not Next.js.**
+**Deployment architecture:** Replit **primary** for web and backend; Netlify **alternative** web hosting; Google Cloud Run **secondary** API hosting. **OpenRouter is the PRIMARY AI model gateway, Google Gemini is SECONDARY AI fallback** (no paid AI endpoint enabled). No provider is claimed deployed by these source files. **Not Next.js.**
 
 ## Latest checkpoint — 21 October 2026
 
@@ -14,6 +14,7 @@
 - Separate TypeScript Hono API containing **real read-only metadata endpoints**, with liveness and an honest `foundation-only` readiness response. No invented member issuance is exposed.
 - Same-origin `/api/v1/*` SSR proxy. Netlify can point to a secured external backend using server-only `OKARD_API_URL`.
 - Shared TypeScript contracts, separate worker shell, package manifests, unit-test source, CI workflow and sample provider deployment files.
+- Server-only **@okard/ai-gateway** with OpenRouter-first chat completions, structured Google Gemini fallback on transient errors, bounded requests, no secret exposure, and eight synthetic/provider-mock test cases; live customer AI endpoints stay disabled.
 - **No database, persistent editor, card export, customer login, production AI, issuance, verification, payments or deployment yet.** Do not represent this preview as those features.
 
 **Verification status:** Source files and JSON configs were checked for presence/parseability. Actual `pnpm install/build/check/test` and real Android/browser E2E were **not executed** because this environment cannot reach npm; the GitHub Actions runs are showing **startup_failure**, with zero jobs. Track 00.1 therefore stays **unfinished** until a trusted online CI/Replit runner passes build and tests and a lockfile is committed.
@@ -40,6 +41,8 @@ Open **http://localhost:3000/** for the homepage, **http://localhost:3000/lab** 
 3. [AI session handoff](docs/AI_SESSION_HANDOFF.md) — where each new ChatGPT session continues.
 4. [Provider deployment](docs/DEPLOYMENT_PROVIDERS.md) — Replit / Netlify / Google architecture, secrets and deployment steps.
 5. [Provider ADR](docs/adr/0001-replit-primary-netlify-google-secondary.md) — architectural decision and tradeoffs.
+6. [AI provider routing](docs/AI_PROVIDER_ROUTING.md) — OpenRouter primary, Gemini secondary and security controls.
+7. [AI routing ADR](docs/adr/0002-openrouter-primary-gemini-secondary.md) — owner provider decision.
 
 ## Product safety and privacy
 
