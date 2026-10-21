@@ -138,7 +138,7 @@ export function createOIDCVerifier(config: {
     const {payload}=await jwtVerify(token,remote,{
       issuer:config.issuer, audience:config.audience,
       algorithms:['RS256','ES256'], clockTolerance:5, requiredClaims:['sub','exp','iat'],
-      maxTokenAge:'1h',
+      maxTokenAge:3_600,
     });
     if(typeof payload.sub!=='string' || !payload.sub || payload.sub.length>200) {
       throw new Error('A valid OIDC subject is required.');
