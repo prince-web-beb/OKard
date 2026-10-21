@@ -1,0 +1,24 @@
+{
+  "name": "okard-creator",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@10.17.1",
+  "engines": {
+    "node": ">=22 <25"
+  },
+  "scripts": {
+    "dev": "node scripts/orchestrate.mjs dev",
+    "start": "node scripts/orchestrate.mjs start",
+    "build": "pnpm -r --if-present build",
+    "check": "pnpm -r --if-present check",
+    "test": "pnpm -r --if-present test",
+    "format:check": "prettier --check .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "prettier": "^3.6.0",
+    "prettier-plugin-svelte": "^3.4.0",
+    "typescript": "^5.9.0"
+  }
+}
