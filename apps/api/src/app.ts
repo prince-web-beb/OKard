@@ -1,6 +1,7 @@
 import { Hono } from 'hono';
 import { secureHeaders } from 'hono/secure-headers';
 import { CARD_FAMILIES, PRODUCT_NAME, SCENE_SCHEMA_VERSION } from '@okard/shared';
+import { getServerAIStatus } from './ai.js';
 
 export const app = new Hono();
 
@@ -23,6 +24,11 @@ app.get('/api/v1/meta', (c) =>
     stage: 'foundation',
     cardFamiliesAvailableForDesign: CARD_FAMILIES.length,
     issuedCredentialsEnabled: false,
+    ai: {
+      primary: getServerAIStatus().primary,
+      secondary: getServerAIStatus().secondary,
+      publicAccessEnabled: getServerAIStatus().publicAccessEnabled,
+    },
   }),
 );
 
