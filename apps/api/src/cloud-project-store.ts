@@ -1,4 +1,5 @@
-import { Pool, type PoolClient } from 'pg';
+import pg, { type Pool, type PoolClient } from 'pg';
+const { Pool: PgPool } = pg;
 import type {
   CloudPrincipal, CloudProject, CloudProjectList, CloudProjectStore,
   ProjectWriteResult,
@@ -218,7 +219,7 @@ export function createCloudPool(databaseUrl: string, options: {ca?: string} = {}
   const ssl=local?undefined:options.ca
     ? {rejectUnauthorized:true,ca:options.ca}
     : {rejectUnauthorized:true};
-  return new Pool({
+  return new PgPool({
     connectionString:address.toString(),
     max:10, idleTimeoutMillis:30_000, connectionTimeoutMillis:5_000,
     ssl,
