@@ -38,6 +38,7 @@ Open **http://localhost:3000/** for the homepage, **http://localhost:3000/lab** 
 
 1. [Enterprise master plan](docs/OKARD_MASTER_IMPLEMENTATION_PLAN.md) — functionality, quality contract, international standards and execution tracks.
 2. [Implementation progress](docs/IMPLEMENTATION_PROGRESS.md) — granular checklist and verified progress gate. Never mark without evidence.
+2a. [GitHub Actions recovery](docs/CI_RECOVERY.md) — persistent pre-job BuildFailed diagnostics, manual runner probe and Replit test commands.
 3. [AI session handoff](docs/AI_SESSION_HANDOFF.md) — where each new ChatGPT session continues.
 4. [Provider deployment](docs/DEPLOYMENT_PROVIDERS.md) — Replit / Netlify / Google architecture, secrets and deployment steps.
 4a. [Reusable scene-engine checkpoint](docs/SCENE_GRAPH_IMPLEMENTATION.md) — code-rendered front/back editing, exports, acceptance tests and honest limitations.
