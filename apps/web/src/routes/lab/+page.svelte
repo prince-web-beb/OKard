@@ -1,5 +1,8 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
+  import { page } from '$app/state';
+  import { normalizeCountryCode, normalizeLocale, listCountryReferences,
+    getCountryReference, createLocalePreview } from '@okard/country-data';
   import { createHamadCardDocument, applyCardCommand, type CardDocument,
     type EditCommand, type HamadEdition, parseCardDocument } from '@okard/design-schema';
   import { renderCardSvg, preflightCardDocument } from '@okard/render-engine';
@@ -13,9 +16,22 @@
     { id: 'future', title: 'Future Identity', color: '#82cde5' },
     { id: 'imperial', title: 'Imperial Edition', color: '#8a6839' }
   ];
+  const initialCard = createHamadCardDocument('royal');
+  initialCard.countryCode = normalizeCountryCode(page.url.searchParams.get('country'));
+  initialCard.locale = normalizeLocale(page.url.searchParams.get('locale') ?? 'en');
   let edition = $state<HamadEdition>('royal');
   let side = $state<CardSide>('front');
-  let card = $state<CardDocument>(createHamadCardDocument('royal'));
+  let card = $state<CardDocument>(initialCard);
+  const supportedLocales = [
+    { code: 'en', name: 'English' },
+    { code: 'fr', name: 'Français' },
+    { code: 'ar', name: 'العربية' },
+    { code: 'es', name: 'Español' },
+    { code: 'pt', name: 'Português' },
+    { code: 'de', name: 'Deutsch' },
+    { code: 'ja', name: '日本語' },
+    { code: 'hi', name: 'हिन्दी' },
+  ] as const;
   let layerId = $state('display-name');
   let photoFile: File | null = null;
   let photoUrl = $state<string | null>(null);
@@ -63,6 +79,10 @@
   const secondaryLayer = $derived(card.artboards.front.nodes.find((node) =>
     node.id === 'secondary-portrait'));
   const secondaryOpacity = $derived(secondaryLayer?.opacity ?? 0.12);
+  const availableCountries = $derived(listCountryReferences(card.locale));
+  const selectedReference = $derived(card.countryCode
+    ? getCountryReference(card.countryCode, card.locale) : null);
+  const localePreview = $derived(createLocalePreview(card.locale));
 
   /**
    * One-finger touch / mouse: select & move an editable layer.
@@ -207,7 +227,10 @@
     const carryName = displayName;
     resetCanvasView();
     edition = next;
-    card = createHamadCardDocument(edition, carryName);
+    const newCard = createHamadCardDocument(edition, carryName);
+    newCard.countryCode = card.countryCode;
+    newCard.locale = card.locale;
+    card = newCard;
     undoHistory = [];
     redoHistory = [];
     chooseSide('front');
@@ -517,6 +540,32 @@
           <input id="backgroundOpacity" type="range" min="0.03" max="0.40" step="0.01"
             value={secondaryOpacity} oninput={(e) => change({kind:'set-opacity', side:'front',
               nodeId:'secondary-portrait', opacity:Number(e.currentTarget.value)})} />
+        </div>
+        <div class="global-editor-settings">
+          <span class="panel-topline">GLOBAL REFERENCES</span>
+          <p class="global-editor-description">Set the language and reference country for this original design. Neither field verifies a person's identity.</p>
+          <label for="referenceCountry">Country / territory reference</label>
+          <select id="referenceCountry" value={card.countryCode ?? ''}
+            onchange={(e) => change({ kind: 'set-country',
+              countryCode: e.currentTarget.value || null })}>
+            <option value="">None selected</option>
+            {#each availableCountries as item (item.code)}
+              <option value={item.code}>{item.flagEmoji} {item.name} ({item.code})</option>
+            {/each}
+          </select>
+          <label for="cardLocale">Display locale</label>
+          <select id="cardLocale" value={card.locale}
+            onchange={(e) => change({kind: 'set-locale', locale: e.currentTarget.value})}>
+            {#each supportedLocales as item (item.code)}
+              <option value={item.code}>{item.name}</option>
+            {/each}
+          </select>
+          <div class="global-editor-example">
+            <span>{selectedReference?.flagEmoji ?? '🌐'} {selectedReference?.name ?? 'Worldwide'}</span>
+            <strong dir={localePreview.direction}>{localePreview.sampleDate}</strong>
+            <small>Locale sample · reference only</small>
+          </div>
+          <a href="/countries" class="global-editor-atlas">Explore all countries <span aria-hidden="true">↗</span></a>
         </div>
         <fieldset class="edition-list">
           <legend>Choose an edition</legend>
