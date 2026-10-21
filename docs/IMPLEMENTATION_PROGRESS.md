@@ -82,6 +82,10 @@
 
 **Next:** Finish Track 00.1 Replit online dependency install, lockfile and full workspace build/check/tests. Verify My Projects and shared studio on real Android, then complete secure server-backed auth/tenant project APIs, encrypted object storage and published template lifecycle. No paid/public OpenRouter or Gemini calls enabled.
 
+## 2026-10-21 — LOCAL PROJECT SOURCE QA FOLLOW-UP
+
+Added browser metadata cursor streaming (no `getAll` across 200 full SVG scenes), reactive IndexedDB enable state for Create button, current-project unsaved-change indicator, and `apps/web/src/routes/projects/projects.test.ts` contract tests. No real browser, package build, CI pass or Replit deployment is claimed. All verification checkboxes stay open. See `docs/PROJECT_LIBRARY_IMPLEMENTATION.md`.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
