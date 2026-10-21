@@ -3,9 +3,9 @@
 **Last refreshed:** 2026-10-21
 **Source repository:** prince-web-beb/OKard
 **Default branch:** main
-**Current phase:** DESIGN/ARCHITECTURE DOCUMENTATION ONLY — no implementation has started.
-**Implementation next item:** Track 00.1 in docs/IMPLEMENTATION_PROGRESS.md
-**Architecture authority:** docs/OKARD_MASTER_IMPLEMENTATION_PLAN.md
+**Current phase:** Track 00.1 SOURCE IMPLEMENTED; package installation/build/tests and deployments NOT VERIFIED.
+**Implementation next item:** Complete Track 00.1 verification: lockfile, CI startup_failure, Replit build and real Android checks.
+**Architecture authority:** docs/OKARD_MASTER_IMPLEMENTATION_PLAN.md\n**Deployment authority:** docs/DEPLOYMENT_PROVIDERS.md and ADR 0001
 
 ## User intent, in plain language
 
@@ -23,7 +23,7 @@ Important: the owner asked to **stop using ChatGPT image output** and build a re
 4. Assistant created docs/IMPLEMENTATION_PROGRESS.md (commit c458abdcac5f14a133d6a1e24b396ea9b299f013).
 5. This handoff file is then committed.
 
-**Do not tell the owner that the product, website, designs or deployment have been completed.** Only repository documentation exists at handoff.
+**Do not tell the owner that the product, full editor, or deployment is complete.** Foundation source and an interactive preview now exist, but build/install/browser checks have not been executed.
 
 ## Must-read order for future agent
 
@@ -35,7 +35,7 @@ Important: the owner asked to **stop using ChatGPT image output** and build a re
 
 ## Architecture locked unless an ADR is approved
 
-- SvelteKit 2 + Svelte 5 + TypeScript + Vite, Tailwind v4 design system. Not Next.js.
+- SvelteKit 2 + Svelte 5 + TypeScript + Vite, Tailwind v4 design system. Not Next.js. **Replit primary full stack, Netlify alternative SSR frontend, Google Cloud Run secondary API, Gemini future AI secondary**; see provider ADR.
 - Hono TypeScript API and separate TypeScript background workers.
 - PostgreSQL/Drizzle, Redis/BullMQ, secure S3-compatible asset storage.
 - Canonical versioned JSON scene graph, measurement in mm, SVG-first editable cards and server-authoritative rendering/export.
@@ -46,12 +46,12 @@ Important: the owner asked to **stop using ChatGPT image output** and build a re
 
 ## Work instruction for the NEXT session
 
-Begin **Track 00.1** without re-planning the product:
+**Continue and verify Track 00.1** without re-planning the product:
 
 1. Verify repo, main branch, current files and latest commits.
 2. Validate compatible stable package versions and licenses before pinning.
-3. Implement monorepo configuration, scripts, SvelteKit shell, Hono API and worker foundations, shared strict TS configuration, package boundaries, lint/typecheck, basic automated tests, and initial CI.
-4. Add genuinely useful Android-first landing/design shell *only after* foundation scaffolding and design token groundwork; do not count unfinished UI as complete.
+3. The initial monorepo, SvelteKit shell, Hono API, worker entry point, shared TS contracts, source tests and initial CI are now committed. **First run** `pnpm install` in a network-enabled Replit/CI environment, generate+commit lockfile, then build/check/test and fix actual errors.
+4. Source includes an Android-first landing shell and `/lab` SVG front/back photo preview. Verify all browser states, fix defects; this is **not a persisted editor**.
 5. Implement no user-facing deceptive credential replication or mock financial-card functions.
 6. Test install/build/typecheck/test. Run available browser/device checks; if unavailable, explicitly say NOT TESTED.
 7. Update tracker with evidence/commits and this handoff with accurate exact next steps.
@@ -92,13 +92,24 @@ Begin **Track 00.1** without re-planning the product:
 | Master plan | Written and committed |
 | Full progress checklist | Written and committed |
 | AI handoff document | Written and committed |
-| SvelteKit app | Not started |
-| Hono API and worker | Not started |
-| Editor / card templates | Not started |
+| SvelteKit app | Source added; not runtime-verified |
+| Hono API and worker | Hono metadata routes and worker placeholder source added; not runtime-verified |
+| Editor / card templates | Nonpersistent `/lab` HTML/SVG design study only; real editor not started |
 | Country references | Not started |
 | AI tools | Not started |
 | Billing / verification / export | Not started |
-| Android testing | Not started |
-| Production deployment | Not started |
+| Android testing | Not performed |
+| Production deployment | Not performed; `.replit`, `netlify.toml`, Google Docker/manifests are config samples |
+
+## 2026-10-21 — foundation/source checkpoint
+
+- **GitHub main commits:** `8061eef` scaffold + API + contracts + CI; `279fe7b` Svelte app/lab and deployment files; `cfdb22d` premium CSS; `11f6b41` shared-contract dev build startup; `e3a5230` secure raster-only preview file input.
+- **Files of note:** `package.json`, `pnpm-workspace.yaml`, `scripts/orchestrate.mjs`, `apps/web/src/routes/+page.svelte`, `apps/web/src/routes/lab/+page.svelte`, `apps/web/src/app.css`, `apps/web/src/routes/api/[...path]/+server.ts`, `apps/api/src/app.ts`, `packages/shared/src/index.ts`, `.replit`, `netlify.toml`, `apps/api/Dockerfile`, `docs/DEPLOYMENT_PROVIDERS.md`.
+- **Static checks done:** GitHub tree listing confirms files; 11 root/package/TS config JSON files parsed successfully.
+- **Runtime validation:** NOT DONE. npm registry inaccessible from current assistant execution environment, so dependency install, build, tests, Playwright and Android device verification cannot be claimed.
+- **GitHub CI:** three push runs at this checkpoint show `startup_failure` and zero jobs, not test failures. Determine GitHub Actions billing/settings/workflow configuration before relying on CI.
+- **Hosting:** Replit app sync/import, Netlify site connection and Google Cloud Run project/deployment are NOT yet done. User said they will sync Replit themselves.
+- **Security/privacy:** Only browser-local image preview; no DB, secrets or personal photos committed. Issuance/verification/AI are not enabled.
+- **Next exact work:** use online Replit/runner to `corepack pnpm install --no-frozen-lockfile`, commit `pnpm-lock.yaml`, run `corepack pnpm build`, `corepack pnpm check`, `corepack pnpm test`, confirm HTTP services, check Android viewport, fix any errors, and mark Track 00.1 only with evidence.
 
 **First responsible action in any future session: read the actual repo, then execute the next unchecked task.**

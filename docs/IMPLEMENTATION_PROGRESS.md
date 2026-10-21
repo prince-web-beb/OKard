@@ -1,9 +1,21 @@
 # OKard Creator — Implementation Progress & Verification Ledger
 
 **Last updated:** 21 October 2026
-**Baseline:** Initial specification-only commit(s). No application implementation exists.
+**Baseline:** Foundation source scaffold is committed, but build/tests are not verified; release gates remain open.
 **Owner repo:** prince-web-beb/OKard
 **Related:** OKARD_MASTER_IMPLEMENTATION_PLAN.md and AI_SESSION_HANDOFF.md
+
+## 2026-10-21 — FOUNDATION CODE CHECKPOINT (UNVERIFIED)
+
+**Code committed to main:** SvelteKit/Svelte 5/Tailwind 4 home and local SVG design lab; Hono read-only metadata API with liveness and honest foundation readiness; shared card-family contracts; worker placeholder; Replit orchestration; Netlify SSR adapter + server-side API proxy; Google Cloud Run API Docker/sample manifest; CI workflow; developer tests. The provider decision is recorded in `docs/DEPLOYMENT_PROVIDERS.md` and ADR 0001.
+
+**What demonstrably works from source inspection:** The full repository tree contains the files, and package.json/tsconfig/prettier JSON parse successfully. User-facing image upload is browser-session-only; no uploaded photo was committed. **Not yet validated by running the site.**
+
+**Blockers:** npm registry inaccessible in assistant execution environment; `pnpm-lock.yaml` not generated; GitHub Actions pushes are reporting `startup_failure` before jobs start (not a passing or failing test result); Replit/Netlify/Google not synced/provisioned by this session. Therefore, **zero checks are marked verified**.
+
+**Track 00.1 next:** Install packages in a network-enabled environment, resolve compatibility issues, commit generated lockfile, make CI actually run, run Svelte/TypeScript build, tests, and actual Android viewport checks. Then update 00.1 checkbox with linked evidence. Current `dev` script builds shared contracts before running API and web.
+
+**Track 01 partial source only:** Premium responsive UI and three HAMAD SVG preview themes are present as a design lab; full template gallery/editor and complete production motion are NOT implemented.
 
 ## Progress accounting and status legend
 
@@ -181,11 +193,11 @@
 
 | Date (UTC) | Track / item | Status | Commit / PR | Tests & results | Android evidence | Remaining blocker |
 |---|---|---|---|---|---|---|
-| 2026-10-21 | Planning documentation | SPECIFIED, NOT IMPLEMENTED | README + master plan + tracker + handoff commits | Not yet executed | None | Start Track 00 |
+| 2026-10-21 | Planning documentation | SPECIFIED | Initial documentation commits | Document review only | None | All work tracks open |\n| 2026-10-21 | Foundation + design lab + provider configurations | IMPLEMENTED IN SOURCE, NOT VERIFIED | 8061eef, 279fe7b, cfdb22d, 11f6b41, e3a5230 | Package manifests JSON-parse; GitHub CI startup_failure; no build/test execution | Not tested on device | Lockfile, CI, online install/build, Replit sync |
 
 ## Immediate next ticket
 
-**00.1:** Scaffold verified SvelteKit 2 + Svelte 5 + TypeScript project, pnpm monorepo configuration, Hono API and worker, shared strict packages; add repeatable local run/test instructions and a CI pass. Do not skip dependency compatibility verification. Update tracker only after tests.
+**00.1 completion gate:** Source scaffold committed. Generate pnpm lockfile; run online package install, build, checks and tests; resolve GitHub Actions startup_failure; verify Android preview and Replit two-service run. Only then check off 00.1. Do not skip dependency compatibility verification.
 
 ## Required status message at end of every coding session
 

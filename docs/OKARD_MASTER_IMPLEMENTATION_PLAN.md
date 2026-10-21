@@ -458,3 +458,18 @@ Record a Decision (ADR) in docs/adr/, with alternatives, implementation tradeoff
 The project is complete **only** when the full publicly promised workflows run on Android and desktop, the server-backed editor operates on real persistent data, all supported card types have working front/back design templates, safe international references function, the renderer supports accurate exports and print preflight, admin/permissions/privacy and billing/issuer security function, AI integrations have fallbacks, successful production deployment is documented, and all critical tests and compliance checks pass.
 
 **No implementation work has been completed as of creation of this document.** This is the build contract and a continuity reference, not a delivery claim.
+
+
+---
+
+## 23. Provider update — owner directive (2026-10-21)
+
+The application **must** keep Replit resources for both frontend and backend; Google must be available as a second provider, and Netlify must also be supported. See `docs/DEPLOYMENT_PROVIDERS.md` and `docs/adr/0001-replit-primary-netlify-google-secondary.md` for this deployment architecture.
+
+- **Primary:** Replit SvelteKit SSR + Hono internal API, accessible through one front-end web origin.
+- **Secondary web:** Netlify SvelteKit SSR using its own adapter, with server-side proxy to a secured API origin. A Replit internal-only port is not reachable by Netlify.
+- **Secondary API:** Google Cloud Run built from the *same* Hono code. No duplicated business logic or automatic unsound failover.
+- **Secondary AI provider:** Google Gemini through the planned provider-neutral gateway; not yet integrated.
+- **Persistence:** One authoritative data plane until cross-cloud backup/replication has been designed and actually tested.
+- **Repo continuity:** All platform-specific configuration lives in the same OKard monorepo. User performs their own Replit sync.
+- **Current source status:** Foundation and an SVG-only browser-local card design preview have been written. No full editor/backend persistence or live hosting is deployed; verify CI/package compatibility before checking off Track 00.1.
