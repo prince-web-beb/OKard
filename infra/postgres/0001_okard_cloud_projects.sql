@@ -111,11 +111,16 @@ BEGIN
 END
 $$;
 
--- Database role used by the web API should have SELECT/INSERT/UPDATE on
--- okard_cloud_projects, SELECT/INSERT on audit, USAGE on audit sequence,
--- and NO table-level DDL/DROP/DELETE grants.
--- Additional database role RLS for future organization/tenant contexts
--- is a pre-release requirement; all v1 app queries include BOTH issuer and
--- subject and tests confirm no cross-owner data disclosure.
+-- Runtime DB role should have SELECT/INSERT/UPDATE on owner-scoped
+-- projects and rate_limits, SELECT/INSERT on audit, USAGE on audit sequence,
+-- and NO DDL/DROP/table-DELETE or BYPASSRLS privileges.
+-- Every app query sets OIDC owner_issuer + owner_subject using transaction-
+-- local variables AND explicitly filters by those columns. RLS enforces a
+-- second owner boundary even if a future query accidentally drops its filter.
+-- Real PostgreSQL multi-user/RLS tests and separate org-tenant roles are
+-- mandatory before enabling in production.
+-- Purge expired rate-limit buckets only via a separate restricted maintenance
+-- role/job, e.g. DELETE FROM okard_cloud_rate_limits
+-- WHERE window_start < now() - interval '2 days'; Never grant DELETE to app role.
 
 COMMIT;
