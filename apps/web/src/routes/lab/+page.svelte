@@ -1,5 +1,6 @@
 <script lang="ts">
-  import { onDestroy } from 'svelte';
+  import { onDestroy, onMount } from 'svelte';
+  import { replaceState } from '$app/navigation';
   import { page } from '$app/state';
   import { normalizeCountryCode, normalizeLocale, listCountryReferences,
     getCountryReference, createLocalePreview } from '@okard/country-data';
@@ -7,6 +8,8 @@
     type EditCommand, type HamadEdition, parseCardDocument } from '@okard/design-schema';
   import { renderCardSvg, preflightCardDocument } from '@okard/render-engine';
   import { createTemplateDocument, getTemplate, HAMAD_SHOWCASE } from '@okard/templates';
+  import { createBrowserProjectRepository, createLocalProject,
+    type ProjectRepository, type LocalProject } from '@okard/project-library';
   import type { CardSide } from '@okard/shared';
   import { screenToMillimetres, movedLayerPosition, distance, center,
     nextPinchTransform, clampZoom, type MmPoint, type ScreenPoint,
@@ -30,6 +33,11 @@
   let activeTemplateId = $state<string | null>(initialGalleryTemplate?.id ?? null);
   let side = $state<CardSide>('front');
   let card = $state<CardDocument>(initialCard);
+  let projectRepository: ProjectRepository | null = null;
+  let currentProject = $state<LocalProject | null>(null);
+  let projectLoading = $state(Boolean(page.url.searchParams.get('project')));
+  let projectBusy = $state(false);
+  const requestedProjectId = page.url.searchParams.get('project');
   const supportedLocales = [
     { code: 'en', name: 'English' },
     { code: 'fr', name: 'Français' },
@@ -60,6 +68,34 @@
   let panY = $state(0);
   const pointers = new Map<number, ScreenPoint>();
   let pinchStart: { distance: number; midpoint: ScreenPoint; transform: PinchTransform } | null = null;
+
+  onMount(() => {
+    // IndexedDB is browser-only. SSR displays a normal preview until hydration.
+    try {
+      projectRepository = createBrowserProjectRepository();
+    } catch (reason) {
+      errorText = reason instanceof Error ? reason.message : 'Device storage is unavailable.';
+      projectLoading = false;
+      return;
+    }
+    if (!requestedProjectId) return;
+    void projectRepository.get(requestedProjectId).then((stored) => {
+      if (!stored) throw new Error('Saved project was not found on this device.');
+      currentProject = stored;
+      card = stored.design;
+      const matchedTemplate = getTemplate(stored.sourceTemplate);
+      activeTemplateId = matchedTemplate?.id ?? null;
+      const hamad = HAMAD_SHOWCASE.find((t) => t.id === stored.sourceTemplate);
+      if (hamad) edition = hamad.edition;
+      clearGesture();
+      chooseSide('front');
+      undoHistory = [];
+      redoHistory = [];
+      notice = 'Your project is open. Press Save to update its device copy.';
+    }).catch((reason) => {
+      errorText = reason instanceof Error ? reason.message : 'Could not open this project.';
+    }).finally(() => { projectLoading = false; });
+  });
 
   const assetUrl = (assetId: string) => assetId === 'portrait' ? photoUrl : null;
   const displayCard = $derived.by(() => {
@@ -248,6 +284,7 @@
     resetCanvasView();
     edition = next;
     activeTemplateId = null;
+    currentProject = null;
     const newCard = createHamadCardDocument(edition, carryName);
     newCard.countryCode = card.countryCode;
     newCard.locale = card.locale;
@@ -399,6 +436,7 @@
       }
       activeTemplateId = familyTemplate?.id ?? null;
       if (hamadTemplate) edition = hamadTemplate.edition;
+      currentProject = null;
       card = restored;
       undoHistory = [];
       redoHistory = [];
@@ -410,6 +448,34 @@
     } finally {
       input.value = '';
     }
+  }
+  /** Create/update a real independent IndexedDB project, with optimistic etag checks. */
+  async function saveAsProject() {
+    if (projectBusy || projectLoading) return;
+    projectBusy = true; errorText = ''; notice = '';
+    try {
+      const storage = projectRepository ?? createBrowserProjectRepository();
+      projectRepository = storage;
+      if (currentProject) {
+        const saved = await storage.saveDesign(currentProject.id, card, currentProject.etag);
+        currentProject = saved;
+        notice = 'Saved on this device. This project is not synced to the cloud.';
+      } else {
+        const source = activeTemplateId ?? 'hamad-' + edition;
+        const base = createLocalProject(source, card.title);
+        const record = { ...base, design: JSON.parse(JSON.stringify(card)) as CardDocument };
+        const saved = await storage.create(record);
+        currentProject = saved;
+        const newUrl = new URL(page.url);
+        newUrl.searchParams.set('project', saved.id);
+        newUrl.searchParams.delete('template');
+        // SvelteKit shallow routing preserves the editing session and in-memory photo.
+        replaceState(newUrl, page.state);
+        notice = 'New project created on this device. Your portrait remains session-only.';
+      }
+    } catch (reason) {
+      errorText = reason instanceof Error ? reason.message : 'The design could not be saved locally.';
+    } finally { projectBusy = false; }
   }
   // Explicit device-only draft actions. Never cache user portraits or credentials.
   function localDraftKey(): string {
@@ -474,14 +540,16 @@
       <span class="brand-glyph">O<span class="brand-glyph-notch"></span></span>
       <span>Kard<span class="brand-caps"> CREATOR</span></span>
     </a>
-    <span class="lab-header-status"><span class="eyebrow-dot"></span> DESIGN LAB · CODE-RENDERED</span>
-    <a class="lab-back" href="/">← Home</a>
+    <span class="lab-header-status"><span class="eyebrow-dot"></span>
+      {currentProject ? 'MY PROJECT · DEVICE-ONLY' : 'DESIGN LAB · CODE-RENDERED'}</span>
+    <a class="lab-back" href="/projects">My Projects ↗</a>
   </header>
   <main class="lab-main">
     <div class="lab-heading">
       <span class="eyebrow">ORIGINAL DESIGN · REAL VECTOR LAYERS</span>
       <h1>The art of <em>identity.</em></h1>
-      <p>Editing: <strong>{activeManifest?.name ?? 'HAMAD ' + edition + ' edition'}</strong>.
+      <p>Editing: <strong>{currentProject?.name ??
+          activeManifest?.name ?? 'HAMAD ' + edition + ' edition'}</strong>.
         This {activeManifest?.family ?? 'private-brand'} card uses editable front/back vector layers.
         The full production editor and authorized issuer workflows are still in development.</p>
       <a href="/templates" class="lab-template-back">← Explore the complete template gallery</a>
@@ -520,6 +588,13 @@
             onclick={() => chooseSide('back')}>Back</button>
         </div>
         <div class="lab-actions" role="group" aria-label="Edit and export controls">
+          <button type="button" class="lab-project-save" disabled={projectBusy || projectLoading}
+            onclick={() => void saveAsProject()}>
+            {projectLoading ? 'Opening project…' :
+              projectBusy ? 'Saving project…' :
+              currentProject ? 'Save project on device' : '+ Create a saved project'}
+          </button>
+          <a class="lab-project-library" href="/projects">My Projects ↗</a>
           <button type="button" onclick={undo} disabled={undoHistory.length === 0}>↶ Undo</button>
           <button type="button" onclick={redo} disabled={redoHistory.length === 0}>↷ Redo</button>
           <button class="lab-download" type="button" disabled={uploading}
@@ -540,7 +615,7 @@
             {/each}</ul>
           </details>
         {/if}
-        <p class="privacy-note">No photo uploads or server saves. Your images stay in this browser session; editable text and layout are stored locally only if you choose Save on this device. SVG and design JSON export are available, but issuer verification, billing and professional print certification are not.</p>
+        <p class="privacy-note">No photo uploads or server sync. Save project stores the editable vector scene in this device's IndexedDB; the older Save on this device button stores a single local draft separately. Photos remain browser-session-only. Export JSON for backup because site data can be erased. Issuer verification, billing and professional print certification are not available.</p>
       </section>
       <aside class="studio-panel" aria-label="Card editor controls">
         <div class="panel-heading">
