@@ -69,6 +69,9 @@
 
 **Next exact task:** finish Track 00.1 by importing GitHub OKard into Replit, installing dependencies with network, committing `pnpm-lock.yaml`, running `pnpm build`, `pnpm check`, `pnpm test` and real Android 320/360/390/412 widths. Fix any observed errors, verify actual 18 gallery previews and `/lab?template=...` flows, then mark with evidence. After verification, implement secure server-backed projects and a real template creator/moderation/version/publish system. Maintain **OpenRouter primary AI, Google Gemini secondary AI; Replit primary hosting, Netlify alternate web, Google Cloud Run alternate API; no Next.js**.
 
+
+**Post-checkpoint hardening:** SVG clip-path IDs now include `doc.id + side` so 18 inline gallery previews cannot collide; regression test in `packages/render-engine/tests/renderer.test.mjs`. Android Chromium gallery uses CSS `content-visibility:auto` with progressive fallback. Full browser QA is still required.
+
 ## User intent, in plain language
 
 The owner wants **OKard Creator**, an original billion-dollar-quality **card creator website**, not an AI image-making chat and not just a HAMAD card. It must create, edit, save, reuse, preview and export many kinds of **front-and-back physical and digital private-brand cards** with high-end luxury design. A specific inspiration is previous portrait-heavy metallic marriage-member card front/back artwork; the actual platform must reproduce this quality through **code-based editable designs**. The owner studies visual designs first before implementing new kinds of card features. The owner specifically said **NO Next.js** and **Android must be first-class from day one**. Modern, stable programming tech, animation, professional layout, international references, AI tools in the roadmap, admin controls, no shortcuts, no fake workflows or unimplemented buttons.
