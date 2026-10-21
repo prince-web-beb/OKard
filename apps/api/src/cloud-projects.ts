@@ -21,6 +21,8 @@ export type ProjectWriteResult =
   | { status: 'ok'; project: CloudProject }
   | { status: 'missing' | 'conflict' | 'limit' };
 export interface CloudProjectStore {
+  /** Distributed, atomic, issuer+subject-bound minute quota. */
+  consumeRateLimit(principal: CloudPrincipal, kind: 'read'|'write'): Promise<boolean>;
   list(principal: CloudPrincipal, limit: number, offset: number): Promise<CloudProjectList>;
   get(principal: CloudPrincipal, id: string): Promise<CloudProject | null>;
   create(principal: CloudPrincipal, project: Pick<CloudProject, 'id' | 'name' | 'sourceTemplate' | 'design'>): Promise<ProjectWriteResult>;
@@ -168,6 +170,12 @@ export function createCloudProjectRoutes(services: CloudProjectServices) {
       c.set('principal',principal);
     } catch {
       return c.json(errorBody('INVALID_TOKEN','Sign in again to continue.'),401);
+    }
+    const kind = c.req.method === 'GET' ? 'read' : 'write';
+    if (!await services.store.consumeRateLimit(c.get('principal'),kind)) {
+      c.header('Retry-After','60');
+      return c.json(errorBody('RATE_LIMITED',
+        'Too many requests. Please retry in about a minute.'),429);
     }
     await next();
   });
