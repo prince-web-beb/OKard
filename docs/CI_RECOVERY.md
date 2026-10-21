@@ -2,7 +2,15 @@
 
 **Last checked:** 21 October 2026  
 **Repository:** `prince-web-beb/OKard` (private)  
-**Status:** BLOCKING build verification. **This is not evidence that the code passed or failed the build.**
+**Status:** BLOCKING build verification. Earlier runs failed before runner allocation; newer runs report a job-level failure without retrievable step logs.
+
+## Update — 21 October 2026, later checks
+
+Recent pushes have progressed **past the old synthetic `startup_failure`**: the named `OKard Foundation CI` workflow now shows `conclusion: failure` and a `typecheck-build-tests` job object. Representative run: https://github.com/prince-web-beb/OKard/actions/runs/39638284240 (job 119354768464).
+
+**Important limitation:** The GitHub connector returns an empty step list for the job, and the job-log retrieval returns `BlobNotFound`. Thus we **cannot verify whether dependency installation, compilation or tests actually ran**, nor attribute the failure to source code. This is now a **job failure with unavailable evidence**, not necessarily a pre-job failure. The owner/team should open that run in GitHub's Actions UI and capture the first failing step/log; if logs are genuinely absent, contact GitHub Support with the run/job IDs.
+
+Keep the manual probe workflow for distinguishing runner allocation from application compilation. Continue with the Replit terminal test route in parallel. Neither Track 00.1 nor any feature verification checkbox can be closed yet.
 
 ## Observed symptoms
 
