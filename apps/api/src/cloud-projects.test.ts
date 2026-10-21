@@ -19,7 +19,9 @@ function fixture() {
   const map=new Map<string,CloudProject>();
   const key=(p:CloudPrincipal,id:string)=>p.issuer+'\n'+p.subject+'\n'+id;
   const ok=(project:CloudProject):ProjectWriteResult=>({status:'ok',project});
+  let limitRequests=false;
   const store:CloudProjectStore={
+    async consumeRateLimit(){return !limitRequests;},
     async list(p,limit,offset){
       const list=[...map].filter(([k])=>k.startsWith(p.issuer+'\n'+p.subject+'\n'))
         .map(([,v])=>v);
@@ -78,9 +80,18 @@ function fixture() {
       },
       ...(body!==undefined?{body:JSON.stringify(body)}:{}),
     });
-  return {request,map};
+  return {request,map,setRateLimited:()=>{limitRequests=true;}};
 }
 describe('OIDC-protected cloud project HTTP contract',()=>{
+  it('enforces a real rate-limit boundary after successful authentication',async()=>{
+    const {request,setRateLimited}=fixture();
+    setRateLimited();
+    const response=await request('GET','/','sessionAlice');
+    expect(response.status).toBe(429);
+    expect(response.headers.get('Retry-After')).toBe('60');
+    expect((await response.json()).error).toBe('RATE_LIMITED');
+    expect((await request('GET','/')).status).toBe(401);
+  });
   it('rejects unsigned/anonymous/non-bearer clients and sends private cache controls',async()=>{
     const {request}=fixture();
     const missing=await request('GET','/');
