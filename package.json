@@ -8,7 +8,7 @@
     "node": ">=22 <25"
   },
   "scripts": {
-    "dev": "node scripts/orchestrate.mjs dev",
+    "dev": "pnpm --filter @okard/shared build && node scripts/orchestrate.mjs dev",
     "start": "node scripts/orchestrate.mjs start",
     "build": "pnpm -r --if-present build",
     "check": "pnpm -r --if-present check",
