@@ -45,9 +45,14 @@ export function normalizeLocale(input: unknown, fallback = 'en'): string {
 }
 export function localeDirection(locale: string): TextDirection {
   const normalized = normalizeLocale(locale);
-  const script = normalized.split('-').find((part) => /^(Arab|Hebr|Thaa|Syrc|Nkoo|Adlm)$/i.test(part));
-  if (script) return 'rtl';
-  const base = normalized.split('-')[0]?.toLowerCase() ?? 'en';
+  const parts = normalized.split('-');
+  // Explicit BCP 47 script overrides the language default, e.g. ar-Latn is LTR.
+  const script = parts.slice(1).find((part) => /^[A-Z][a-z]{3}$/.test(part));
+  if (script) {
+    return new Set(['Arab', 'Hebr', 'Thaa', 'Syrc', 'Nkoo', 'Adlm'])
+      .has(script) ? 'rtl' : 'ltr';
+  }
+  const base = parts[0]?.toLowerCase() ?? 'en';
   return new Set(['ar', 'fa', 'he', 'ur', 'ps', 'sd', 'ug', 'yi', 'dv', 'ckb']).has(base) ? 'rtl' : 'ltr';
 }
 export function flagEmojiForCountry(code: string): string {
