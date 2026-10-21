@@ -17,6 +17,20 @@
 
 **Track 01 partial source only:** Premium responsive UI and three HAMAD SVG preview themes are present as a design lab; full template gallery/editor and complete production motion are NOT implemented.
 
+## 2026-10-21 — OPENROUTER PRIMARY IMPLEMENTATION CHECKPOINT
+
+**Explicit owner requirement:** OpenRouter must be OKard's **PRIMARY AI model gateway**. Google Gemini is the secondary AI provider; Replit/Netlify/Google Cloud Run hosting roles stay unchanged.
+
+**New source implemented:** `packages/ai-gateway/src/index.ts` (typed server-only OpenRouter REST primary + direct Gemini REST fallback), package/TS configuration and 8 Node test cases; `apps/api/src/ai.ts` server factory; Hono metadata now discloses only safe provider order and disabled-public-AI state; Replit dev startup and Google Cloud Run Docker builds account for the new gateway package; `.env.example` includes real secret variable names without values.
+
+**Actual verified in this session:** a locally assembled matching gateway TypeScript implementation compiled with `tsc 5.8.3` (Node 22.16.0) and **8 mocked provider tests passed** for OpenRouter success, Google 429 fallback, 401/400 no-fallback, absent-primary no fallback, invalid request rejection, malformed response fallback and status redaction. This is limited *isolated module* verification, **not** proof that the exact committed monorepo has built or that live OpenRouter/Google requests succeeded.
+
+**Not verified:** full pnpm install/build/check/test, workflow scheduling (GitHub Actions still `startup_failure` before jobs), actual provider secrets, usage accounting persistence, paid public AI service, Replit/Netlify/Google deployment, Android tests. OpenRouter and Gemini model slugs need explicit provider selections.
+
+**Status:** Provider gateway source is implemented, **Track 10 remains [ ]**; no public AI route is exposed. Next: finish Track 00.1 (lockfile/build/CI/Android), then server auth, rate/financial quotas and opt-in proposal workflow before opening the gateway to customers.
+
+**Relevant architecture:** `docs/AI_PROVIDER_ROUTING.md` and `docs/adr/0002-openrouter-primary-gemini-secondary.md`.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
