@@ -805,3 +805,13 @@ em { font-weight: 400; color: var(--gold-pale); }
   color:var(--gold-pale);font-size:12px;font-weight:700;
 }
 .lab-template-card a:hover { text-decoration:underline; text-underline-offset:4px; }
+
+
+/* Reduce offscreen layout work for long 18-card mobile catalogs.
+   Browser support is progressive; content remains fully present for no-support UAs. */
+@supports (content-visibility: auto) {
+  .catalog-card {
+    content-visibility: auto;
+    contain-intrinsic-size: auto 510px;
+  }
+}
