@@ -1,0 +1,20 @@
+# Minimal workflow to distinguish GitHub Actions dispatch failures from app build errors.
+# Trigger manually from Actions > OKard Dispatcher Probe > Run workflow.
+# If this ALSO returns BuildFailed/startup_failure with 0 jobs, investigate
+# repository Actions settings/permissions/billing or open a GitHub Support ticket.
+name: OKard Dispatcher Probe
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - name: Prove Actions can allocate a runner
+        run: |
+          echo "OKard dispatch has entered a runner."
+          node --version
