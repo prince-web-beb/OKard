@@ -8,6 +8,18 @@
 **Architecture authority:** docs/OKARD_MASTER_IMPLEMENTATION_PLAN.md
 **Deployment authority:** docs/DEPLOYMENT_PROVIDERS.md and ADR 0001
 
+## LATEST HANDOFF — 2026-10-21 AUTHENTICATED CLOUD STAGING SOURCE
+
+**Checkpoint:** Cloud project infrastructure and explicit client-side cloud sync have now been committed to `main` while remaining **OFF by default**. Read `docs/CLOUD_AUTH_SYNC_IMPLEMENTATION.md` for exact endpoints, variables, migrations, release blockers. The runtime feature flag is `OKARD_CLOUD_PROJECTS_ENABLED=false`; no configured OIDC issuer, PostgreSQL database, connected Replit app or authenticated deployment is present. Do not report cloud synchronization production ready.
+
+**API code:** `apps/api/src/cloud-projects.ts` (bearer OIDC/JWKS verification, issuer/sub owner, 512000-byte strict JSON, safe scene/template checks, ETags and tenant-scoped CRUD, 429 rate controls), `apps/api/src/cloud-project-store.ts` (pg Pool owner SET LOCAL inside every transaction, audited owner-filtered SQL, 200 cap, CAS version, signed-in atomic per-minute read/write limits), `apps/api/src/app.ts` feature gates/503 when off + DB schema-aware health. Migration `infra/postgres/0001_okard_cloud_projects.sql` defines projects/audit/quota tables and **forced RLS**; PL/pgSQL `DO $` quoting was corrected and verified from GitHub source. API uses `jose` and `pg` with CJS-compatible NodeNext import. Tests source in `apps/api/src/cloud-projects.test.ts`.
+
+**Browser code:** `apps/web/src/lib/auth.ts` uses real OIDC Authorization Code+PKCE with sessionStorage-only, issuer/client/audience public config; `/account` and `/auth/callback` handle configured provider redirect/session, otherwise present unavailable/continue local UI. `apps/web/src/lib/cloud-projects.ts` sends same-origin bearer to `/api/v1/cloud/projects`, transmits strict If-Match versions and parses scene responses; tests in `apps/web/src/lib/cloud-projects.test.ts`. `/projects` offers opt-in upload, explicit conflict handling and no-overwrite local downloads. Web API proxy strips cookies but keeps Authorization. CSS for Android auth/sync. AI primary OpenRouter and secondary Google Gemini unchanged.
+
+**Status honesty:** tests have been checked in but no complete build/tests or real provider/DB/Android have been executed. GitHub Actions `typecheck-build-tests` fails and logs are not available; isolated prior gestures tests passed but do NOT establish full CI. Replit exact OKard app lookup still not found. No user portrait bytes have been uploaded or persisted. Cloud off by default.
+
+**Next required session steps:** (1) First inspect current GitHub head and `docs/IMPLEMENTATION_PROGRESS.md`; (2) owner syncs private OKard into network-enabled Replit; run pnpm install/build/check/test and commit lockfile, fix errors; (3) provision real trusted OIDC audience/JWKS and Postgres with migration + dedicated non-BYPASSRLS app role and external rate-limited ingress; (4) verify RLS account isolation, bearer wrong issuer/audience, rate limits and conflict handling against real staging DB; (5) test `/account`, `/projects` manual sync on real Android; (6) only then turn on feature flag. Continue asset uploads, backups/erasure, teams/template lifecycle after these gates. No Next.js. Do not present work as tested/deployed without evidence.
+
 ## 2026-10-21 — OPENROUTER PRIMARY MODEL DIRECTIVE AND IMPLEMENTATION
 
 - **OpenRouter is primary for every OKard AI design call; Google Gemini is secondary fallback.** Replit remains primary frontend/backend host, Netlify alternative frontend, Google Cloud Run alternative API hosting.
