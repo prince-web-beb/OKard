@@ -13,7 +13,8 @@
   "dependencies": {
     "@okard/shared": "workspace:*",
     "@okard/design-schema": "workspace:*",
-    "@okard/render-engine": "workspace:*"
+    "@okard/render-engine": "workspace:*",
+    "@okard/editor-engine": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/adapter-netlify": "^5.0.0",
