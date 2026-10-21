@@ -5,6 +5,18 @@
 **Owner repo:** prince-web-beb/OKard
 **Related:** OKARD_MASTER_IMPLEMENTATION_PLAN.md and AI_SESSION_HANDOFF.md
 
+## 2026-10-21 — AUTHENTICATED CLOUD + OIDC + MANUAL SYNC (SOURCE ONLY, NOT ENABLED)
+
+**Latest committed implementation:** Server-side `/api/v1/cloud/projects` read/create/replace/rename/duplicate/soft-delete with validated canonical scenes, read-only list metadata, strict bearer JWT verification via `jose` (trusted HTTPS JWKS, RS256/ES256, issuer, API audience, `sub`, `iat`, expiry, <=3600s age), 512,000-byte request cap, `If-Match` optimistic versions, tenant scoping by **issuer AND subject**, atomic audit in Postgres, 200-project cap and authenticated 120 GET/30 mutation per minute quota. SQL migration `infra/postgres/0001_okard_cloud_projects.sql` enforces **FORCE ROW LEVEL SECURITY** for project, audit and quota tables, with SET LOCAL account identity on every store query. Unauthorized HTTP requests never access DB. Cloud routes return **503 by default** unless feature flag, real trusted OIDC and Postgres secrets are explicitly configured. Health readiness checks required tables when enabled.
+
+**New browser source:** `/account`, `/auth/callback` support configurable Authorization Code + PKCE via `oidc-client-ts`, session-only browser token storage, no custom password fields. `/projects` has real manual *Back up to cloud* and *Download to device* controls plus an explicit conflict confirmation; no automatic upload, no live issuance claims and no photo bytes uploaded. Same-origin SvelteKit proxy strips unrelated cookies and forwarded host headers while preserving explicit signed API bearer. Source tests added: `apps/api/src/cloud-projects.test.ts`, `apps/web/src/lib/cloud-projects.test.ts` and app-level no-anonymous-cloud assertion. Additional documentation: `docs/CLOUD_AUTH_SYNC_IMPLEMENTATION.md`.
+
+**Verification:** files and GitHub commits exist. **No OIDC provider, real database, Replit app, Netlify deployment or cloud credentials connected**. SQL migrations/RLS/quotas have NOT been executed against a real Postgres DB. Full `pnpm build/check/test` and Android UI have NOT run; GitHub Actions still fails with unavailable step logs. **Do not mark Track 00.1 or authenticated projects completed**, nor claim actual login or cloud sync works. Leave `OKARD_CLOUD_PROJECTS_ENABLED=false`.
+
+**Remaining release blockers:** obtain Replit online build with lockfile and CI logs; register actual trusted OIDC provider/client/API audience and JWKS; apply RLS migration with least-privileged runtime role; test signature rotations and issuer/audience failures, multi-user PostgreSQL isolation/concurrent writes/quotas; rate-limit unauthenticated requests at ingress; define cleanup job for quota buckets and project erasure, backups and private encrypted portrait storage; real Samsung/Android E2E and security audit.
+
+**Next code tasks:** resolve the mandatory Track 00.1 build first, then test secure cloud in staging with REAL secrets and browser OIDC callback. Complete user-owned asset storage and shared template management. Preserve OpenRouter PRIMARY, Gemini SECONDARY, Replit primary, Netlify alternate UI, Cloud Run alternate Hono API; **no Next.js**.
+
 ## 2026-10-21 — FOUNDATION CODE CHECKPOINT (UNVERIFIED)
 
 **Code committed to main:** SvelteKit/Svelte 5/Tailwind 4 home and local SVG design lab; Hono read-only metadata API with liveness and honest foundation readiness; shared card-family contracts; worker placeholder; Replit orchestration; Netlify SSR adapter + server-side API proxy; Google Cloud Run API Docker/sample manifest; CI workflow; developer tests. The provider decision is recorded in `docs/DEPLOYMENT_PROVIDERS.md` and ADR 0001.
