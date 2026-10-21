@@ -16,12 +16,15 @@
     "@hono/node-server": "^2.1.0",
     "hono": "^4.10.0",
     "@okard/country-data": "workspace:*",
-    "@okard/templates": "workspace:*"
+    "@okard/templates": "workspace:*",
+    "jose": "^6.0.0",
+    "pg": "^8.15.0"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",
     "tsx": "^4.20.0",
     "typescript": "^5.9.0",
-    "vitest": "^3.2.0"
+    "vitest": "^3.2.0",
+    "@types/pg": "^8.15.0"
   }
 }
