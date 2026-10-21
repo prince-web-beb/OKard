@@ -70,3 +70,18 @@ test('interactive SVG provides selectable hit targets and a visible non-exported
   assert.doesNotMatch(exported, /data-okard-layer=/);
   assert.doesNotMatch(exported, /stroke="#42dfbd"/);
 });
+
+
+test('inline SVG clip paths are namespaced by document and side across gallery cards', () => {
+  const first = createHamadCardDocument('royal');
+  const second = createHamadCardDocument('future');
+  const firstSvg = renderCardSvg(first,'front',{resolveAsset:()=> 'data:image/png;base64,AA=='});
+  const secondSvg = renderCardSvg(second,'front',{resolveAsset:()=> 'data:image/png;base64,AA=='});
+  const firstBack = renderCardSvg(first,'back');
+  assert.match(firstSvg, /id="okard-artboard-hamad-royal-front"/);
+  assert.match(secondSvg, /id="okard-artboard-hamad-future-front"/);
+  assert.match(firstBack, /id="okard-artboard-hamad-royal-back"/);
+  assert.match(firstSvg, /id="okard-hamad-royal-front-main-portrait"/);
+  assert.match(secondSvg, /id="okard-hamad-future-front-main-portrait"/);
+  assert.ok(!secondSvg.includes('okard-hamad-royal-front-main-portrait'));
+});
