@@ -243,7 +243,7 @@ export function createBrowserProjectRepository(): ProjectRepository {
         customError=error;
         try { tx.abort(); } catch { /* already aborted */ }
       };
-      tx.oncomplete=() => { db.close(); resolve(clone(value)); };
+      tx.oncomplete=() => { db.close(); resolve(value === undefined ? value : clone(value)); };
       tx.onerror=() => { /* onabort handles error */ };
       tx.onabort=() => {
         db.close();
