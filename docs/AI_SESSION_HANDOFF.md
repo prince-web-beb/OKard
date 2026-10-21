@@ -29,6 +29,14 @@
 
 **Next exact tasks:** On a network-enabled Replit workspace (owner syncs), install, generate committed `pnpm-lock.yaml`, run build/check/tests, fix errors, test `/lab` at Android widths and inspect SVG export. Then continue Track 03 missing node primitives/canonical migration, Track 04 touch handling, Track 05 text and export parity, while keeping provider order **OpenRouter primary / Google Gemini secondary**. Update this handoff and tracker after each verified step.
 
+## 2026-10-21 — VALIDATION AND SVELTE PROXY FIXES
+
+- New schema command layer was corrected to **JSON-roundtrip clone** validated scene documents instead of `structuredClone` on Svelte 5 reactive Proxy objects (which would throw `DataCloneError`). A regression test was added for proxy-based edits.
+- SVG XML escaping was corrected for TypeScript strict indexing. Browser integration tests now cover rendered front/back, scene roundtrip and escaped input. The lab also validates/imports local design JSON (images intentionally excluded).
+- Added `.github/workflows/dispatcher-probe.yml` and `docs/CI_RECOVERY.md` to diagnose GitHub's **synthetic BuildFailed/startup_failure, zero-job** behavior. Running it requires a manual Action trigger by the owner/team; no Actions job was successfully allocated as of this handoff.
+- Runtime tests and Android checks **still not verified**. **Do not mark Track 00.1, 03, 04 or 05 verified.**
+- Next: Replit sync by owner, online pnpm install and lockfile, build/check/test, fix failures, screenshot and Android interaction checks, then progress ledger. OpenRouter primary and Google Gemini secondary remain unchanged.
+
 ## User intent, in plain language
 
 The owner wants **OKard Creator**, an original billion-dollar-quality **card creator website**, not an AI image-making chat and not just a HAMAD card. It must create, edit, save, reuse, preview and export many kinds of **front-and-back physical and digital private-brand cards** with high-end luxury design. A specific inspiration is previous portrait-heavy metallic marriage-member card front/back artwork; the actual platform must reproduce this quality through **code-based editable designs**. The owner studies visual designs first before implementing new kinds of card features. The owner specifically said **NO Next.js** and **Android must be first-class from day one**. Modern, stable programming tech, animation, professional layout, international references, AI tools in the roadmap, admin controls, no shortcuts, no fake workflows or unimplemented buttons.
