@@ -18,6 +18,12 @@
 
 `DEPLOY_TARGET` selects the **web adapter**, not user identity or cloud failover. `OKARD_API_URL` selects the backend for SSR. Never hard-code actual API hostnames or keys into the shipped client bundle.
 
+## Authenticated cloud design service — staged source (still disabled)
+
+The codebase now includes a **PostgreSQL project service with owner-scoped RLS**, atomic read/write quotas, audited mutations and optimistic ETag versioning. The Hono endpoints are feature-gated by `OKARD_CLOUD_PROJECTS_ENABLED=false` plus trusted issuer/audience/JWKS/DATABASE_URL secrets. The browser has an OIDC-PKCE account route and explicit local-to-cloud backup/download controls; **none are connected to a real issuer or database yet**.
+
+These are **not** deployed authentication, registered clients, working project synchronization or persistent image storage. Real issuer provisioning, Postgres migration, separate app role, TLS, WAF protection, migration/rollback, backup/restore and browser/Android verification are required before enabling. See `docs/CLOUD_AUTH_SYNC_IMPLEMENTATION.md`.
+
 ## Replit — primary full-stack
 
 1. Import/sync the private GitHub repository into Replit **as the user intended to do personally**. The agent must not overwrite other Replit apps.
