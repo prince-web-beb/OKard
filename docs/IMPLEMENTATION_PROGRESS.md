@@ -41,6 +41,16 @@
 
 **Track state:** Track 03 foundation partly implemented, Track 04 and 05 partly implemented, **all 19 track-level VERIFIED checkboxes remain unchecked**. Track 00.1 is still the next *verification* gate. Continue remaining tools and data workflows only after build confidence improves.
 
+## 2026-10-21 — ANDROID EDITOR TOUCH + AUTHORING CHECKPOINT
+
+**Implemented and committed to main:** Reusable `@okard/editor-engine` TypeScript package for pointer conversion into physical millimetres, 0.25 mm snapping, bounded drag, zoom/pinch math and panning. The SVG renderer now produces selectable layer hit targets and a non-exported cyan selection overlay for editor mode only. The `/lab` screen supports tap/select, one-pointer dragging, two-pointer zoom/pan, reset/zoom controls, plus creation of text and shape layers, rotation, precise sizing, fill/opacity, lock/unlock, duplicate, reorder and delete. Browser users can explicitly save/restore/erase scene drafts locally; photos stay in memory and are never persisted to localStorage. Design-schema commands and tests extended. Replit dev startup now builds all shared scene/render/gesture packages.
+
+**Locally verified isolated subset:** matching gesture engine source compiled successfully using `tsc 5.8.3` and all **4 Node 22 gesture tests passed** (mm mapping, snapped clamped move, pinch behavior, invalid inputs). All other unit tests are source-committed but have NOT run in a full installed monorepo.
+
+**Not verified and NOT marked done:** `pnpm install/build/check/test`, GitHub CI pre-job `startup_failure`, SvelteKit browser runtime, real Android gestures and screen-reader checks, and deployment. See `docs/ANDROID_EDITOR_TOUCH_IMPLEMENTATION.md` and `docs/CI_RECOVERY.md` for exact acceptance matrix. **All 19 track-level VERIFIED checkboxes remain unchecked** because evidence threshold has not been met.
+
+**Next verification ticket:** owner/team syncs GitHub OKard with Replit; online install and lockfile; run workspace build/check/test, inspect TypeScript/Svelte warnings, verify `/lab` editing on Android, and update this ledger with logs/screenshots. Then proceed with authenticated storage and remaining Track 04 controls.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
