@@ -230,7 +230,7 @@ export function applyCardCommand(doc: CardDocument, command: EditCommand, now?: 
     if (!artboard) throw new CardSchemaError(['unknown card side']);
     if (command.kind === 'insert') {
       if (artboard.nodes.some((n) => n.id === command.node.id)) throw new CardSchemaError(['duplicate node id']);
-      artboard.nodes.push(structuredClone(command.node));
+      artboard.nodes.push(JSON.parse(JSON.stringify(command.node)) as SceneNode);
     } else {
       const nodeIndex = artboard.nodes.findIndex((n) => n.id === command.nodeId);
       if (nodeIndex < 0) throw new CardSchemaError(['unknown layer id']);
