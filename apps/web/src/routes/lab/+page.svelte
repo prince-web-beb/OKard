@@ -362,6 +362,50 @@
       input.value = '';
     }
   }
+  // Explicit device-only draft actions. Never cache user portraits or credentials.
+  function localDraftKey(): string {
+    return 'okard:local-scene:v1:' + card.id;
+  }
+  function saveLocalDraft() {
+    try {
+      const payload = JSON.stringify(card);
+      if (payload.length > 500 * 1024) throw new Error('Design is too large for a browser draft.');
+      window.localStorage.setItem(localDraftKey(), payload);
+      notice = 'Design saved on this device. Photo is not stored.';
+      errorText = '';
+    } catch (error) {
+      errorText = error instanceof Error ? error.message : 'The browser could not save the draft.';
+    }
+  }
+  function restoreLocalDraft() {
+    try {
+      const value = window.localStorage.getItem(localDraftKey());
+      if (!value) throw new Error('No local draft exists for this edition on this device.');
+      if (value.length > 500 * 1024) throw new Error('Saved draft is too large.');
+      const restored = parseCardDocument(value);
+      if (restored.id !== card.id || restored.family !== 'private-brand') {
+        throw new Error('This local draft belongs to another design.');
+      }
+      card = restored;
+      clearGesture();
+      undoHistory = [];
+      redoHistory = [];
+      chooseSide('front');
+      notice = 'Local draft restored. Re-add your photo if needed.';
+      errorText = '';
+    } catch (error) {
+      errorText = error instanceof Error ? error.message : 'The local draft could not be restored.';
+    }
+  }
+  function deleteLocalDraft() {
+    try {
+      window.localStorage.removeItem(localDraftKey());
+      notice = 'The saved draft for this edition has been cleared from this device.';
+      errorText = '';
+    } catch {
+      errorText = 'The browser could not remove the saved draft.';
+    }
+  }
   function downloadScene() {
     // The document contains asset IDs but NEVER embeds the uploaded personal image.
     downloadBlob(JSON.stringify(card, null, 2), 'application/json',
@@ -429,6 +473,9 @@
           <button class="lab-download" type="button" disabled={uploading}
             onclick={downloadSvg}>{uploading ? 'Preparing…' : '↓ Export ' + side + ' SVG'}</button>
           <button type="button" onclick={downloadScene}>↓ Scene JSON</button>
+          <button type="button" onclick={saveLocalDraft}>Save on this device</button>
+          <button type="button" onclick={restoreLocalDraft}>Restore local draft</button>
+          <button type="button" onclick={deleteLocalDraft}>Clear local draft</button>
           <label class="lab-import-control" for="importScene">↑ Import design JSON
             <input id="importScene" type="file" accept=".json,application/json" onchange={importScene} />
           </label>
@@ -441,7 +488,7 @@
             {/each}</ul>
           </details>
         {/if}
-        <p class="privacy-note">No photo uploads or server saves. Your images stay in this browser session. SVG and design JSON export are available, but issuer verification, billing and professional print certification are not.</p>
+        <p class="privacy-note">No photo uploads or server saves. Your images stay in this browser session; editable text and layout are stored locally only if you choose Save on this device. SVG and design JSON export are available, but issuer verification, billing and professional print certification are not.</p>
       </section>
       <aside class="studio-panel" aria-label="Card editor controls">
         <div class="panel-heading">
