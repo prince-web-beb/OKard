@@ -37,6 +37,14 @@
 - Runtime tests and Android checks **still not verified**. **Do not mark Track 00.1, 03, 04 or 05 verified.**
 - Next: Replit sync by owner, online pnpm install and lockfile, build/check/test, fix failures, screenshot and Android interaction checks, then progress ledger. OpenRouter primary and Google Gemini secondary remain unchanged.
 
+## 2026-10-21 — TOUCH INTERACTION AND LOCAL DRAFT CHECKPOINT
+
+**Latest new source:** `packages/editor-engine` contains pure verified gesture math (screen-to-mm, grid snapping, bounds, pinch pan/zoom); `packages/render-engine` adds interactive-only SVG hit attributes/selection outline; `packages/design-schema` now supports rectangle/text insert, resize, rotate, color, lock, reorder, duplicate and remove. `apps/web/src/routes/lab/+page.svelte` now has actual one-finger or mouse drag, two-finger pinch/pan, keyboard-friendly numeric property inspector, add text/shape, undo/redo, and explicit local-only save/restore/delete. Browser portrait assets remain session-only. The `apps/web` package and root dev script declare/build the new editor package.
+
+**Evidence:** Standalone matching editor-engine TypeScript compiled with local `tsc 5.8.3` and four Node 22 mock/unit tests passed. Full SvelteKit/monorepo build, real Android E2E, CI and provider deployments are still **unverified**. All track-level progress boxes remain open. Files `docs/ANDROID_EDITOR_TOUCH_IMPLEMENTATION.md` and `docs/CI_RECOVERY.md` contain QA steps.
+
+**Exact next:** Replit sync (no editable OKard app found on connected Replit), install packages with network, generate `pnpm-lock.yaml`, run `pnpm build && pnpm check && pnpm test`, fix any compile issues, verify touch/zoom/export and local drafts on actual Android, and document observed results. Then build authenticated project persistence, asset library, advanced touch handles and all card families. Preserve OpenRouter PRIMARY and Google Gemini secondary model routing, Replit primary hosting, Netlify alternative frontend and Google Cloud Run secondary API.
+
 ## User intent, in plain language
 
 The owner wants **OKard Creator**, an original billion-dollar-quality **card creator website**, not an AI image-making chat and not just a HAMAD card. It must create, edit, save, reuse, preview and export many kinds of **front-and-back physical and digital private-brand cards** with high-end luxury design. A specific inspiration is previous portrait-heavy metallic marriage-member card front/back artwork; the actual platform must reproduce this quality through **code-based editable designs**. The owner studies visual designs first before implementing new kinds of card features. The owner specifically said **NO Next.js** and **Android must be first-class from day one**. Modern, stable programming tech, animation, professional layout, international references, AI tools in the roadmap, admin controls, no shortcuts, no fake workflows or unimplemented buttons.
