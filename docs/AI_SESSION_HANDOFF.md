@@ -45,6 +45,10 @@
 
 **Exact next:** Replit sync (no editable OKard app found on connected Replit), install packages with network, generate `pnpm-lock.yaml`, run `pnpm build && pnpm check && pnpm test`, fix any compile issues, verify touch/zoom/export and local drafts on actual Android, and document observed results. Then build authenticated project persistence, asset library, advanced touch handles and all card families. Preserve OpenRouter PRIMARY and Google Gemini secondary model routing, Replit primary hosting, Netlify alternative frontend and Google Cloud Run secondary API.
 
+## 2026-10-21 — CI STATUS UPDATE AFTER TOUCH-EDITOR COMMITS
+
+**GitHub Actions state changed:** later OKard pushes now instantiate a named `typecheck-build-tests` job and end with `conclusion: failure` rather than solely synthetic `startup_failure`. Attempt to retrieve steps returned an empty array and GitHub job-log retrieval returned `BlobNotFound`. We **cannot identify the failing command or claim tests ran**. Representative run: https://github.com/prince-web-beb/OKard/actions/runs/39638284240. Keep CI and full monorepo verification **BLOCKED** until logs or a Replit online build are available; see `docs/CI_RECOVERY.md`.
+
 ## User intent, in plain language
 
 The owner wants **OKard Creator**, an original billion-dollar-quality **card creator website**, not an AI image-making chat and not just a HAMAD card. It must create, edit, save, reuse, preview and export many kinds of **front-and-back physical and digital private-brand cards** with high-end luxury design. A specific inspiration is previous portrait-heavy metallic marriage-member card front/back artwork; the actual platform must reproduce this quality through **code-based editable designs**. The owner studies visual designs first before implementing new kinds of card features. The owner specifically said **NO Next.js** and **Android must be first-class from day one**. Modern, stable programming tech, animation, professional layout, international references, AI tools in the roadmap, admin controls, no shortcuts, no fake workflows or unimplemented buttons.
