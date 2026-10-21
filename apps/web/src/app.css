@@ -394,3 +394,45 @@ em { font-weight: 400; color: var(--gold-pale); }
   .zoom-controls { justify-content: center; }
   .svg-preview-wrap { overflow: clip; }
 }
+
+
+/* Each command is a real scene-graph edit and participates in undo/redo. */
+.layer-creation,
+.layer-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 9px;
+}
+.layer-actions { margin-top: 6px; }
+.layer-creation button,
+.layer-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--line);
+  background: rgba(216, 172, 101, .07);
+  color: #eee0c5;
+  min-height: 46px;
+  padding: 8px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  transition: background 150ms ease;
+}
+.layer-creation button:hover:not(:disabled),
+.layer-actions button:hover:not(:disabled) {
+  background: rgba(216, 172, 101, .17);
+}
+.layer-actions .layer-delete { border-color: rgba(227, 112, 112, .4); color: #f2b6b6; }
+.layer-inspector input[type='range'] {
+  width: 100%;
+  min-height: 39px;
+  accent-color: #ccb181;
+}
+.layer-inspector input[type='color'] {
+  padding: 5px;
+  cursor: pointer;
+  min-height: 48px;
+}
+@media (max-width: 480px) {
+  .layer-creation button, .layer-actions button { font-size: 11px; }
+}
