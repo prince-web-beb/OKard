@@ -436,3 +436,154 @@ em { font-weight: 400; color: var(--gold-pale); }
 @media (max-width: 480px) {
   .layer-creation button, .layer-actions button { font-size: 11px; }
 }
+
+
+/* Worldwide reference atlas — premium, Android-first, never an official ID interface. */
+.global-shell {
+  min-height: 100svh;
+  background:
+    radial-gradient(ellipse at 100% -10%, rgba(206, 170, 105, .13), transparent 45%),
+    #0a0d13;
+}
+.global-main {
+  max-width: 1690px;
+  margin: 0 auto;
+  padding: clamp(38px, 5.5vw, 86px) clamp(17px, 5.3vw, 90px) 115px;
+}
+.global-intro { max-width: 900px; margin-bottom: 57px; }
+.global-intro h1 {
+  font: 400 clamp(49px, 6.3vw, 98px)/1.08 Georgia, 'Times New Roman', serif;
+  letter-spacing: -.055em;
+  margin: 22px 0 24px;
+}
+.global-intro p {
+  color: #b7b3b2;
+  font-size: clamp(13px, 1.2vw, 16px);
+  line-height: 1.8;
+  max-width: 760px;
+}
+.global-highlights {
+  display: flex; flex-wrap: wrap; gap: 16px 39px;
+  padding-top: 32px;
+}
+.global-highlights > div { display: grid; gap: 8px; }
+.global-highlights strong {
+  font: 400 39px Georgia, serif; color: #ebd6ad;
+}
+.global-highlights span { font-size: 9px; letter-spacing: .22em; color: #97979e; }
+.global-workspace {
+  display: grid;
+  grid-template-columns: minmax(0,1fr) minmax(310px, 365px);
+  gap: 24px; align-items: start;
+}
+.global-library, .global-preview {
+  background: linear-gradient(145deg, #161a22, #0f1116);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  min-width: 0;
+}
+.global-library { padding: clamp(18px, 2.6vw, 38px); }
+.global-library-heading { display: flex; justify-content: space-between; gap: 12px; align-items: end; }
+.global-library-heading h2 {
+  font: 400 clamp(25px,2.5vw,37px) Georgia,serif;
+  letter-spacing: -.025em; margin: 12px 0 0;
+}
+.global-count {
+  font-size: 11px; color: #d9c69f; white-space: nowrap;
+  border: 1px solid var(--line); border-radius: 20px; padding: 8px 11px;
+}
+.global-filters {
+  display: grid; grid-template-columns: minmax(0, 1fr) minmax(135px, 220px);
+  gap: 12px; margin: 27px 0 20px;
+}
+.global-filters > div { display: grid; gap: 10px; min-width: 0; }
+.global-filters label { font-size: 11px; color: #d1c8b4; }
+.global-filters input, .global-filters select {
+  min-height: 49px; border: 1px solid rgba(228,203,154,.24);
+  border-radius: 9px; width: 100%; color: #eae4db; background: #0b0d13;
+  padding: 0 14px; font-size: 13px;
+}
+.global-filters input::placeholder { color: #858589; }
+.global-reference-grid {
+  display: grid;
+  grid-template-columns: repeat(2,minmax(0,1fr)); gap: 9px;
+  max-height: 780px; overflow: auto; padding-right: 5px;
+  overscroll-behavior: contain;
+  scrollbar-color: #685a42 #101319;
+}
+.global-reference-grid > button {
+  display: flex; align-items: center; gap: 11px;
+  border: 1px solid rgba(255,255,255,.11);
+  border-radius: 12px; padding: 14px 13px; min-height: 77px;
+  text-align: left; color: #efe6d7;
+  background: #181b23;
+  transition: border-color 160ms, background 160ms;
+}
+.global-reference-grid > button:hover,
+.global-reference-grid > button.active {
+  background: rgba(203,166,100,.12);
+  border-color: rgba(209,177,119,.6);
+}
+.global-flag { flex: 0 0 auto; font-size: 29px; line-height: 1; }
+.global-name { display: grid; gap: 4px; min-width: 0; flex: 1; }
+.global-name strong { font-size: 12px; font-weight: 600; word-break: break-word; }
+.global-name small { font-size: 10px; color: #a7a5a4; }
+.global-code { font-size: 10px; font-weight: 700; letter-spacing: .1em; color: var(--gold); }
+.global-no-results {
+  grid-column: 1/-1; text-align: center; padding: 45px 18px;
+  color: #c8c4bf; font-size: 13px; line-height: 1.8;
+}
+.global-no-results button {
+  display: block; margin: 14px auto 0; padding: 10px 19px;
+  border-radius: 8px; border: 1px solid var(--gold);
+  background: none; color: var(--gold);
+}
+.global-preview {
+  padding: 30px;
+  position: sticky; top: 97px;
+  background: radial-gradient(ellipse at top right,rgba(210,169,101,.11),transparent 50%),#12151b;
+}
+.global-preview-top { display: flex; justify-content: space-between; gap: 15px; align-items: center; }
+.global-preview-code { font-size: 11px; color: var(--gold); letter-spacing: .19em; }
+.global-preview-flag { font-size: 69px; line-height: 1.4; margin-top: 29px; }
+.global-preview h2 { font: 400 clamp(28px,3vw,45px) Georgia,serif; margin: 11px 0; line-height: 1.15; }
+.global-preview-english { color: #aaa8ac; font-size: 13px; margin: 0; }
+.global-preview-line { height: 1px; background: var(--line); margin: 29px 0; }
+.global-preview-metric { display: grid; gap: 6px; margin-bottom: 23px; }
+.global-preview-metric > span { color: #99949b; font-size: 10px; letter-spacing: .19em; }
+.global-preview-metric > strong { font-size: 14px; font-weight: 500; color: #f2e7d4; overflow-wrap: anywhere; }
+.global-preview-note {
+  padding: 17px; border: 1px solid var(--line); border-radius: 9px;
+  background: rgba(225,187,123,.055); font-size: 11px; line-height: 1.7;
+  color: #bcb6ae; margin: 24px 0;
+}
+.global-create { width: 100%; justify-content: space-between; }
+.global-featured { margin-top: 37px; border-top: 1px solid var(--line); padding-top: 24px; }
+.global-featured > span { font-size: 10px; color: #b5b2ae; letter-spacing: .15em; }
+.global-featured > div { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+.global-featured button {
+  min-width: 45px; min-height: 44px; background: #1d2129;
+  border: 1px solid var(--line); border-radius: 8px; font-size: 23px;
+}
+.global-featured button:hover { border-color: var(--gold); }
+@media (max-width: 1000px) {
+  .global-workspace { grid-template-columns: minmax(0,1fr) 290px; gap: 15px; }
+  .global-library { padding: 17px; }
+  .global-preview { padding: 23px; }
+}
+@media (max-width: 760px) {
+  .global-workspace { grid-template-columns: 1fr; }
+  .global-preview { position: static; order: -1; }
+  .global-reference-grid { max-height: 590px; }
+  .global-intro { margin-bottom: 36px; }
+}
+@media (max-width: 460px) {
+  .global-main { padding-inline: 13px; }
+  .global-intro h1 { font-size: clamp(49px, 13vw, 65px); }
+  .global-highlights { gap: 15px 28px; }
+  .global-highlights strong { font-size: 30px; }
+  .global-filters { grid-template-columns: 1fr; }
+  .global-reference-grid { grid-template-columns: 1fr; }
+  .global-reference-grid > button { min-height: 69px; padding: 11px 12px; }
+  .global-preview { padding: 23px; }
+}
