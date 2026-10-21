@@ -19,6 +19,16 @@
 - **Next task:** online dependency install and lockfile, full typecheck/build/test, investigate GitHub Actions workflow startup failure, run authenticated/quota architecture before any real billable AI endpoint. Do not mark Track 00 or Track 10 complete yet.
 - **Mandatory:** inspect actual current repository commits, progress checklist and provider docs before new edits; don't confuse Google hosting with Google as second model provider.
 
+## 2026-10-21 — SCENE GRAPH AND EDITOR IMPLEMENTATION HANDOFF
+
+**Current source checkpoint:** `packages/design-schema/src/index.ts` and `packages/render-engine/src/index.ts` are now committed. `apps/web/src/routes/lab/+page.svelte` uses these packages instead of its old hard-coded SVG design; `apps/web/src/app.css` supplies Android controls. The lab supports editable front/back `CardDocument` revisions, HAMAD three original styles, local photo for main+faded background, switch side, select/change text and numeric coordinates, undo/redo, portable SVG export and JSON save/restore of scene structure. Uploaded photos are excluded from JSON and remain browser-only.
+
+**Additional files:** `packages/design-schema/tests/document.test.mjs`, `packages/render-engine/tests/renderer.test.mjs`, two package manifests/tsconfigs, `docs/SCENE_GRAPH_IMPLEMENTATION.md`. Web package now references both workspace libraries.
+
+**Not yet verified:** No npm registry access from assistant runtime and GitHub Actions produces `startup_failure` before jobs. No full `pnpm install/build/check/test`, no current browser/Android test and no Replit deployment. Do not claim templates/rendering production ready. No real authenticated persistence or printing/issuing/payment code; no public paid AI endpoint.
+
+**Next exact tasks:** On a network-enabled Replit workspace (owner syncs), install, generate committed `pnpm-lock.yaml`, run build/check/tests, fix errors, test `/lab` at Android widths and inspect SVG export. Then continue Track 03 missing node primitives/canonical migration, Track 04 touch handling, Track 05 text and export parity, while keeping provider order **OpenRouter primary / Google Gemini secondary**. Update this handoff and tracker after each verified step.
+
 ## User intent, in plain language
 
 The owner wants **OKard Creator**, an original billion-dollar-quality **card creator website**, not an AI image-making chat and not just a HAMAD card. It must create, edit, save, reuse, preview and export many kinds of **front-and-back physical and digital private-brand cards** with high-end luxury design. A specific inspiration is previous portrait-heavy metallic marriage-member card front/back artwork; the actual platform must reproduce this quality through **code-based editable designs**. The owner studies visual designs first before implementing new kinds of card features. The owner specifically said **NO Next.js** and **Android must be first-class from day one**. Modern, stable programming tech, animation, professional layout, international references, AI tools in the roadmap, admin controls, no shortcuts, no fake workflows or unimplemented buttons.
