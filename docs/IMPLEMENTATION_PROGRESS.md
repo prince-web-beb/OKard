@@ -63,6 +63,14 @@
 
 **Next:** finish Track 00.1 package resolution, lockfile, CI/build and real Android test; then build complete editable 18-family template registry/gallery and verified country print/phone/address profiles. Preserve OpenRouter as PRIMARY model provider, Google Gemini as SECONDARY, Replit as primary host.
 
+## 2026-10-21 — ALL 18 CARD FAMILY TEMPLATE CATALOGS (SOURCE COMMITTED, UNVERIFIED)
+
+**Implementation:** New `@okard/templates` package contains **18 distinct front-and-back starter compositions**, one for every existing `CARD_FAMILIES` entry. Each manifest defines design copy/fields, visual geometry/palette, portrait needs, issuer requirements and non-credential preview status. Also preserves HAMAD Royal/Future/Imperial. A new Android-first `/templates` gallery allows family/search filtering, live SVG front/back flip, and opening every template in the **existing shared** `/lab?template=...` editor (not a separate editor per category). The editor now supports generic scene JSON import/export and local drafts for registered templates, family-specific field input, reverse-side inscription, conditional portrait UI and issuer authorization notices. Hono has read-only `/api/v1/templates` and `/api/v1/templates/:id` metadata routes. Replit/web/API/Cloud Run dependencies updated. Documentation: `docs/TEMPLATE_CATALOG_IMPLEMENTATION.md`.
+
+**Static verification performed:** Source manifest was read from GitHub and checked: 18 IDs, 18 distinct families, 18 distinct declared compositions, matching the existing family registry. Tests committed: `packages/templates/tests/catalog.test.mjs`, `apps/web/src/routes/templates/gallery.test.ts`, additional Hono tests. This is **NOT** an executed workspace test run. GitHub Actions continues reporting `failure` and earlier job log retrieval was unavailable. Full install/build/check/tests and Android gallery/editor E2E remain outstanding.
+
+**Progress:** Track 07 is **partially implemented in source** but **NOT VERIFIED**. Template creation/publishing/versioning, admin management, full font/shaping, manufacturing proof, authenticated persistence and browser/mobile QA remain open. **Do not mark Track 07 as completed**. Track 00.1 remains blocked until Replit sync or an online build runner produces successful evidence.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
