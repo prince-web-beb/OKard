@@ -1,7 +1,7 @@
 <script lang="ts">
   import { onDestroy } from 'svelte';
   import { createHamadCardDocument, applyCardCommand, type CardDocument,
-    type EditCommand, type HamadEdition } from '@okard/design-schema';
+    type EditCommand, type HamadEdition, parseCardDocument } from '@okard/design-schema';
   import { renderCardSvg, preflightCardDocument } from '@okard/render-engine';
   import type { CardSide } from '@okard/shared';
 
@@ -153,6 +153,31 @@
       errorText = error instanceof Error ? error.message : 'SVG export failed.';
     } finally { uploading = false; }
   }
+  async function importScene(event: Event) {
+    const input = event.currentTarget as HTMLInputElement;
+    const file = input.files?.[0];
+    if (!file) return;
+    try {
+      if (file.size > 500 * 1024 || !file.name.toLowerCase().endsWith('.json')) {
+        throw new Error('Choose an OKard design JSON file below 500 KB.');
+      }
+      const restored = parseCardDocument(await file.text());
+      if (restored.family !== 'private-brand' || !['hamad-royal', 'hamad-future', 'hamad-imperial'].includes(restored.id)) {
+        throw new Error('This preview imports HAMAD private-brand scenes only. Other card families will be supported in the full editor.');
+      }
+      edition = restored.id.replace('hamad-', '') as HamadEdition;
+      card = restored;
+      undoHistory = [];
+      redoHistory = [];
+      chooseSide('front');
+      notice = 'Editable design restored from JSON. Reupload your photo if it is missing.';
+      errorText = '';
+    } catch (error) {
+      errorText = error instanceof Error ? error.message : 'This file is not a compatible OKard design.';
+    } finally {
+      input.value = '';
+    }
+  }
   function downloadScene() {
     // The document contains asset IDs but NEVER embeds the uploaded personal image.
     downloadBlob(JSON.stringify(card, null, 2), 'application/json',
@@ -204,6 +229,9 @@
           <button class="lab-download" type="button" disabled={uploading}
             onclick={downloadSvg}>{uploading ? 'Preparing…' : '↓ Export ' + side + ' SVG'}</button>
           <button type="button" onclick={downloadScene}>↓ Scene JSON</button>
+          <label class="lab-import-control" for="importScene">↑ Import design JSON
+            <input id="importScene" type="file" accept=".json,application/json" onchange={importScene} />
+          </label>
         </div>
         {#if preflight.length > 0}
           <details class="lab-preflight">
