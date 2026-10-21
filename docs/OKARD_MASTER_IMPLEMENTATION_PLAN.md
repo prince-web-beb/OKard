@@ -473,3 +473,14 @@ The application **must** keep Replit resources for both frontend and backend; Go
 - **Persistence:** One authoritative data plane until cross-cloud backup/replication has been designed and actually tested.
 - **Repo continuity:** All platform-specific configuration lives in the same OKard monorepo. User performs their own Replit sync.
 - **Current source status:** Foundation and an SVG-only browser-local card design preview have been written. No full editor/backend persistence or live hosting is deployed; verify CI/package compatibility before checking off Track 00.1.
+
+
+---
+
+## 24. AI MODEL PROVIDER ORDER — OWNER DIRECTIVE (2026-10-21)
+
+**OpenRouter is the PRIMARY AI model gateway. Google Gemini is the SECONDARY AI model provider, for controlled fallback.** This does not change the separate hosting decision: Replit remains the frontend/backend primary, Netlify the alternative web frontend and Google Cloud Run alternative API compute.
+
+A server-only `@okard/ai-gateway` package now contains typed OpenRouter REST and Gemini REST adapters, retryable-only fallback and bounded request/response handling. This **does not** mean a publicly usable AI feature is launched. Before connecting AI to users, build authentication, consent, quotas, cost limits, provider enable/disable controls, scene-edit proposal reviews, audit logs and opt-in handling for sensitive images. No provider API keys in browsers. Models must be explicitly chosen by the operator, not hardcoded.
+
+Detailed policy and references: `docs/AI_PROVIDER_ROUTING.md` and `docs/adr/0002-openrouter-primary-gemini-secondary.md`. Track 10 stays unchecked until all AI deliverables have actual end-to-end verification.
