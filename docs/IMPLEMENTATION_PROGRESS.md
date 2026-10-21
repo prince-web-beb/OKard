@@ -55,6 +55,14 @@
 
 **GitHub Actions state changed:** later OKard pushes now instantiate a named `typecheck-build-tests` job and end with `conclusion: failure` rather than solely synthetic `startup_failure`. Attempt to retrieve steps returned an empty array and GitHub job-log retrieval returned `BlobNotFound`. We **cannot identify the failing command or claim tests ran**. Representative run: https://github.com/prince-web-beb/OKard/actions/runs/39638284240. Keep CI and full monorepo verification **BLOCKED** until logs or a Replit online build are available; see `docs/CI_RECOVERY.md`.
 
+## 2026-10-21 — WORLDWIDE COUNTRY ATLAS, LOCALE, EDITABLE METADATA
+
+**Implementation committed:** `@okard/country-data` with all 249 ISO 3166-1 country/territory alpha-2 assignments; locale-aware official *country name references* using `Intl.DisplayNames`, multilingual search, emoji flags, BCP 47 canonical locale detection, RTL/LTR script handling and date/number previews. Public read-only Hono `/api/v1/countries` and `/api/v1/countries/:code` support bounded queries. New Android-first SvelteKit `/countries` page presents a searchable global atlas and real deep links into `/lab?country=...&locale=...`. Card documents now validate actual ISO country codes and support undoable `set-country` / `set-locale` commands, kept across scene save/restore and edition changes. Replit, Netlify and Google Cloud Run build dependency files have been updated. See `docs/WORLDWIDE_COUNTRY_REFERENCES.md`.
+
+**Verified isolated checks:** GitHub-retrieved source list contains exactly **249 codes, all unique**. Node 22 Intl runtime independently resolves Belgium/Belgique and Arabic UAE, and accepts extended BCP 47 `zh-Hant-TW-u-ca-gregory`. Unit and API test code has been committed, but full workspace install/build/tests **HAVE NOT RUN**. Browser/Android verification and deployment **HAVE NOT RUN**. Full Track 08 remains **[ ] not verified**.
+
+**Next:** finish Track 00.1 package resolution, lockfile, CI/build and real Android test; then build complete editable 18-family template registry/gallery and verified country print/phone/address profiles. Preserve OpenRouter as PRIMARY model provider, Google Gemini as SECONDARY, Replit as primary host.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
