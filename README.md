@@ -6,6 +6,9 @@
 
 ## Latest checkpoint — 21 October 2026
 
+**Worldwide phase update:** A reusable `@okard/country-data` package now contains 249 ISO 3166-1 country/territory codes with locale-aware names, BCP 47 formatting and RTL/LTR support. New Android-first `/countries` route provides search and safe design references, with actual `/lab?country=...&locale=...` metadata editing. Country-specific issuer/official ID layouts are **not** replicated. The new country code is committed but full build and Android QA remain unverified. Read `docs/WORLDWIDE_COUNTRY_REFERENCES.md`.
+
+
 **Source code is now present**, beyond the initial planning documents:
 
 - SvelteKit 2 + Svelte 5 + TypeScript + Vite + Tailwind 4 public site shell.
@@ -43,6 +46,7 @@ Open **http://localhost:3000/** for the homepage, **http://localhost:3000/lab** 
 3. [AI session handoff](docs/AI_SESSION_HANDOFF.md) — where each new ChatGPT session continues.
 4. [Provider deployment](docs/DEPLOYMENT_PROVIDERS.md) — Replit / Netlify / Google architecture, secrets and deployment steps.
 4a. [Reusable scene-engine checkpoint](docs/SCENE_GRAPH_IMPLEMENTATION.md) — code-rendered front/back editing, exports, acceptance tests and honest limitations.
+4b. [Worldwide country references](docs/WORLDWIDE_COUNTRY_REFERENCES.md) — 249 ISO records, country atlas, BCP 47 support and QA gates.
 5. [Provider ADR](docs/adr/0001-replit-primary-netlify-google-secondary.md) — architectural decision and tradeoffs.
 6. [AI provider routing](docs/AI_PROVIDER_ROUTING.md) — OpenRouter primary, Gemini secondary and security controls.
 7. [AI routing ADR](docs/adr/0002-openrouter-primary-gemini-secondary.md) — owner provider decision.
