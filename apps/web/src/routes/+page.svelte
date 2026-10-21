@@ -24,8 +24,9 @@
       <a href="/countries">Worldwide</a>
       <a href="/templates">Templates</a>
       <a href="/lab">Design lab</a>
+      <a href="/projects">My Projects</a>
     </nav>
-    <a class="topbar-cta" href="/templates">Explore templates <span aria-hidden="true">↗</span></a>
+    <a class="topbar-cta" href="/projects">My Projects <span aria-hidden="true">↗</span></a>
   </header>
 
   <main>
