@@ -33,7 +33,9 @@ const proxy: RequestHandler = async ({ params, request, url, fetch }) => {
   const destination = new URL('/api/' + path, upstreamBase);
   destination.search = url.search;
   const headers = new Headers(request.headers);
-  for (const name of ['host', 'connection', 'transfer-encoding', 'content-length', 'accept-encoding', 'origin']) {
+  // Forward an explicit verified bearer access token, but never forward
+  // unrelated web session cookies to a separately hosted Replit/Cloud Run API.
+  for (const name of ['host', 'connection', 'transfer-encoding', 'content-length', 'accept-encoding', 'origin', 'cookie', 'x-forwarded-host', 'x-forwarded-proto']) {
     headers.delete(name);
   }
   let body: ArrayBuffer | undefined;
