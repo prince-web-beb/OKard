@@ -587,3 +587,39 @@ em { font-weight: 400; color: var(--gold-pale); }
   .global-reference-grid > button { min-height: 69px; padding: 11px 12px; }
   .global-preview { padding: 23px; }
 }
+
+
+/* Editor country/locale controls are metadata, not part of a government ID. */
+.global-editor-settings {
+  margin: 25px 0 0;
+  display: grid; gap: 11px;
+  padding: 20px 0 24px;
+  border-block: 1px solid var(--line);
+}
+.global-editor-settings label {
+  color: #e3d9c9; font-size: 12px; font-weight: 650;
+}
+.global-editor-description {
+  font-size: 11px; color: #aaa7a9; margin: 0 0 6px;
+  line-height: 1.65;
+}
+.global-editor-settings select {
+  width: 100%; min-height: 49px;
+  background: #0d1017; color: #e6dfd3;
+  border-radius: 9px; border: 1px solid rgba(255,255,255,.17);
+  padding: 11px; font-size: 12px;
+}
+.global-editor-example {
+  display: grid; gap: 8px; padding: 17px 15px;
+  border-radius: 11px; background: rgba(201,171,112,.07);
+  border: 1px solid var(--line);
+}
+.global-editor-example > span { font-size: 13px; color: var(--gold-pale); }
+.global-editor-example > strong { font-weight: 500; font-size: 13px; overflow-wrap: anywhere; }
+.global-editor-example > small { color: #b5b0af; font-size: 10px; }
+.global-editor-atlas {
+  display: inline-flex; justify-content: space-between;
+  align-items: center; padding: 13px 2px;
+  color: var(--gold); font-size: 12px; min-height: 44px;
+}
+.global-editor-atlas:hover { text-decoration: underline; text-underline-offset: 4px; }
