@@ -23,6 +23,8 @@ app.get('/health/ready', async (c) => {
   try {
     // Fail readiness when schema migration has not been applied.
     await cloudHealthPool.query('SELECT id FROM okard_cloud_projects LIMIT 0');
+    await cloudHealthPool.query('SELECT owner_issuer FROM okard_cloud_rate_limits LIMIT 0');
+    await cloudHealthPool.query('SELECT id FROM okard_cloud_project_audit LIMIT 0');
     return c.json({
       status: 'cloud-storage-connected', service: 'okard-api',
       cloudProjects: 'configured', database: 'connected',
