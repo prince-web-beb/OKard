@@ -90,6 +90,9 @@ All SVGs are rendered using `@okard/render-engine`. No custom HTML or scripts ar
 
 **These tests are committed but have NOT run in a successfully installed pnpm workspace.** Do not claim a passing build or Android browser run.
 
+
+**Rendering correction:** Inline SVG clipPath identifiers now use the validated document ID and side rather than one global identifier, avoiding cross-card clipping collisions on the multi-preview gallery. A renderer regression test is committed. Long mobile galleries use progressive `content-visibility:auto` performance optimization. Neither was verified on a real device in this session.
+
 ## Android UX delivery & review checklist
 
 - [ ] Gallery at 320/360/390/412 CSS px; one-column comfortable layout, no horizontal overflow, filters keyboard-safe.
