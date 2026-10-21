@@ -201,7 +201,8 @@
             {#each shown as project (project.id)}
               <article class="project-card">
                 <div class="project-card-preview">
-                  {@html renderCardSvg(project.design, previewBack[project.id] ? 'back' : 'front')}
+                  {@html renderCardSvg(project.design, previewBack[project.id] ? 'back' : 'front',
+                    { idNamespace: 'project-' + project.id })}
                 </div>
                 <div class="project-card-toolbar">
                   <span>{previewBack[project.id] ? 'BACK SIDE' : 'FRONT SIDE'}</span>
