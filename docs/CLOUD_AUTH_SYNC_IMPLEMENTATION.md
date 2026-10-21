@@ -25,6 +25,14 @@ Every endpoint requires **Bearer access token**, verified with `jose` using expl
 
 Backend client-supplied source family must match registered card template ID and exact scene family. Server additionally validates the complete CardDocument before persistence, blocks unsupported image asset IDs, restricts payload to 512,000 bytes and enforces the registered card families. Issuer and subject are derived ONLY from signed access-token claims; a request cannot choose another account's owner.
 
+### Owner-level RLS and distributed quotas — source added
+
+The SQL migration also **enables and FORCEs PostgreSQL row-level security (RLS)** on three tables: projects, audit records, and per-owner quota counters. Every repository method now creates a transaction and supplies verified issuer/subject through transaction-local PostgreSQL configuration keys. They are cleared at COMMIT/ROLLBACK. Owner filters remain in the SQL as a second control. The app role must not have `BYPASSRLS`.
+
+A database-backed per-owner, per-minute quota now runs for every successfully authenticated API request, using an atomic UPSERT guarded by the owner RLS policy: **120 reads/minute or 30 writes/minute per principal**. Quota exhaustion returns **429 + Retry-After: 60**; this is shared between Replit/Cloud Run instances that use the same Postgres DB. Unauthorized-token flood control still requires **separate edge rate limiting**. A restricted scheduled maintenance role must purge expired quota buckets; no such job is deployed.
+
+**These RLS policies and quotas are committed but have NOT been executed against a live PostgreSQL instance or penetration-tested.** Explicit cloud enable remains OFF.
+
 ### PostgreSQL: `apps/api/src/cloud-project-store.ts`
 
 - Parameterized SQL for all operations; **owner_issuer AND owner_subject** in every read and mutation condition.
