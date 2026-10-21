@@ -4,6 +4,8 @@ import { CARD_FAMILIES, PRODUCT_NAME, SCENE_SCHEMA_VERSION } from '@okard/shared
 import { getServerAIStatus } from './ai.js';
 import { getCountryReference, listCountryReferences, normalizeLocale, ISO_COUNTRY_COUNT } from '@okard/country-data';
 import { getTemplate, listTemplates, getTemplateFamilyCoverage } from '@okard/templates';
+import { createCloudProjectRoutes, createOIDCVerifier } from './cloud-projects.js';
+import { createCloudPool, createPostgresProjectStore } from './cloud-project-store.js';
 
 export const app = new Hono();
 
@@ -89,6 +91,38 @@ app.get('/api/v1/templates/:id', (c) => {
     ? c.json({ template, issuedCredentialsEnabled: false })
     : c.json({ error: 'UNKNOWN_TEMPLATE', message: 'Template not found.' }, 404);
 });
+
+/**
+ * Cloud design synchronization has NO anonymous fallback.
+ * Only enabled when a trusted external OIDC issuer, its HTTPS JWKS and the
+ * PostgreSQL database have been explicitly configured in server secrets.
+ * No password handling, mock users or unsigned token modes are exposed.
+ */
+const cloudConfig = {
+  issuer: process.env.OKARD_OIDC_ISSUER?.trim() ?? '',
+  audience: process.env.OKARD_OIDC_AUDIENCE?.trim() ?? '',
+  jwksUrl: process.env.OKARD_OIDC_JWKS_URL?.trim() ?? '',
+  databaseUrl: process.env.DATABASE_URL?.trim() ?? '',
+};
+const cloudReady = Boolean(cloudConfig.issuer && cloudConfig.audience &&
+  cloudConfig.jwksUrl && cloudConfig.databaseUrl);
+if (cloudReady) {
+  const verifier = createOIDCVerifier(cloudConfig);
+  const database = createCloudPool(cloudConfig.databaseUrl, {
+    ca: process.env.OKARD_DATABASE_CA_CERT,
+  });
+  const store = createPostgresProjectStore(database);
+  app.route('/api/v1/cloud/projects',createCloudProjectRoutes({
+    store,verifyToken:verifier,
+  }));
+} else {
+  const disabled = (c: import('hono').Context) => c.json({
+    error: 'CLOUD_NOT_CONFIGURED',
+    message: 'Cloud projects are not enabled on this deployment.',
+  },503);
+  app.all('/api/v1/cloud/projects',disabled);
+  app.all('/api/v1/cloud/projects/*',disabled);
+}
 
 app.notFound((c) => c.json({ error: 'NOT_FOUND', message: 'This endpoint does not exist.' }, 404));
 app.onError((error, c) => {
