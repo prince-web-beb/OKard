@@ -14,7 +14,7 @@
       id:t.id, label:t.name, family:'private-brand',
     })),
   ];
-  let repository: ProjectRepository | null = null;
+  let repository = $state.raw<ProjectRepository | null>(null);
   let loaded = $state(false);
   let busy = $state(false);
   let error = $state('');
