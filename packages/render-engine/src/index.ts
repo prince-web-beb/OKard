@@ -12,6 +12,11 @@ export interface RenderOptions {
   /** Interactive HTML editor preview only; NEVER enable for print exports. */
   interactive?: boolean;
   selectedLayerId?: string;
+  /**
+   * A stable, instance-unique SVG clip namespace for duplicate scene previews
+   * on the same page (e.g. two projects started from the same template).
+   */
+  idNamespace?: string;
 }
 export interface PreflightIssue {
   severity: 'warning' | 'error';
@@ -79,7 +84,11 @@ export function renderCardSvg(doc: CardDocument, side: CardSide, options: Render
   if (side !== 'front' && side !== 'back') throw new Error('Invalid card side');
   const w = finite(doc.size.widthMm);
   const h = finite(doc.size.heightMm);
-  const namespace = doc.id;
+  const namespace = options.idNamespace
+    ? /^[A-Za-z][A-Za-z0-9_-]{0,120}$/.test(options.idNamespace)
+      ? options.idNamespace
+      : (() => { throw new Error('Invalid SVG namespace'); })()
+    : doc.id;
   const nodes = doc.artboards[side].nodes.map(n => renderLayer(n, side, options, namespace)).join('\n');
   const selected = options.interactive && options.selectedLayerId
     ? doc.artboards[side].nodes.find((n) => n.id === options.selectedLayerId && n.visible && !n.locked)
