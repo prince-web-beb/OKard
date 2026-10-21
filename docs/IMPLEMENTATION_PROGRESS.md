@@ -51,6 +51,10 @@
 
 **Next verification ticket:** owner/team syncs GitHub OKard with Replit; online install and lockfile; run workspace build/check/test, inspect TypeScript/Svelte warnings, verify `/lab` editing on Android, and update this ledger with logs/screenshots. Then proceed with authenticated storage and remaining Track 04 controls.
 
+## 2026-10-21 — CI STATUS UPDATE AFTER TOUCH-EDITOR COMMITS
+
+**GitHub Actions state changed:** later OKard pushes now instantiate a named `typecheck-build-tests` job and end with `conclusion: failure` rather than solely synthetic `startup_failure`. Attempt to retrieve steps returned an empty array and GitHub job-log retrieval returned `BlobNotFound`. We **cannot identify the failing command or claim tests ran**. Representative run: https://github.com/prince-web-beb/OKard/actions/runs/39638284240. Keep CI and full monorepo verification **BLOCKED** until logs or a Replit online build are available; see `docs/CI_RECOVERY.md`.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
