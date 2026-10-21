@@ -74,6 +74,14 @@
 
 **Post-checkpoint QA hardening:** The SVG renderer now namespaces clipPath IDs per document and card side to prevent collage/gallery clipping collisions; matching test added. Gallery CSS progressively defers offscreen rendering using `content-visibility:auto` on supported Android browsers. These remain source-only until full browser validation.
 
+## 2026-10-21 — LOCAL MULTI-PROJECT LIBRARY CHECKPOINT (DEVICE-ONLY, SOURCE IMPLEMENTED)
+
+**Committed to GitHub:** `@okard/project-library` encapsulates a versioned `LocalProject` record (independent UUID, source template, validated canonical front/back scene, title, created/modified date, local etag), browser IndexedDB repository with an indexed project store, defensive in-memory test adapter, project list/get/create/edit with atomic etag conflict protection, rename, duplicate, remove, 200-project limit and 500-KiB scene-size cap. Uploaded photos remain browser-session-only, not saved in IndexedDB. `/projects` is a premium Android-first library with new-project creation from 18 families + HAMAD editions, full metadata search, bounded/lazy card preview loading, independent front/back flip, inline rename, duplicate and deletion confirmation. `/lab?project=<uuid>` opens existing scenes; Save updates the correct record; unsaved designs can create a distinct persistent device project. The older `localStorage` single-draft controls remain separate. A renderer `idNamespace` now avoids SVG clip collisions among copies of the same template. See `docs/PROJECT_LIBRARY_IMPLEMENTATION.md`.
+
+**Static evidence:** source files and package/build/navigation connections confirmed through GitHub, including new `packages/project-library/tests/projects.test.mjs`. Browser IndexedDB and package test suites have NOT been run in this session; **do not claim app works or all tests pass**. Actions still fails without retrievable step logs, npm registry unavailable in assistant container, and Replit OKard app not connected. Track 06/09 partially source-implemented; **verification remains unchecked**, no cloud sync or persistent portrait storage.
+
+**Next:** Finish Track 00.1 Replit online dependency install, lockfile and full workspace build/check/tests. Verify My Projects and shared studio on real Android, then complete secure server-backed auth/tenant project APIs, encrypted object storage and published template lifecycle. No paid/public OpenRouter or Gemini calls enabled.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
