@@ -42,10 +42,16 @@ async function audit(
     [projectId,owner.issuer,owner.subject,event,version],
   );
 }
-async function tx<T>(pool:Pool, fn:(client:PoolClient)=>Promise<T>):Promise<T> {
+async function tx<T>(
+  pool:Pool, owner:CloudPrincipal, fn:(client:PoolClient)=>Promise<T>,
+):Promise<T> {
   const client=await pool.connect();
   try {
     await client.query('BEGIN');
+    // SET LOCAL is cleared at commit/rollback, so connection reuse does not
+    // leak one signed-in user's tenant identity to another request.
+    await client.query("SELECT set_config('okard.owner_issuer',$1,true), set_config('okard.owner_subject',$2,true)",
+      [owner.issuer,owner.subject]);
     const value=await fn(client);
     await client.query('COMMIT');
     return value;
@@ -73,38 +79,40 @@ export function createPostgresProjectStore(pool: Pool): CloudProjectStore {
   const store:CloudProjectStore = {
     async list(owner,limit,offset):Promise<CloudProjectList> {
       // The LIST response deliberately does not include any card design data.
-      const [rows,count]=await Promise.all([
-        pool.query<Omit<Row,'design'>>(
+      return tx(pool,owner,async(client)=>{
+        const rows=await client.query<Omit<Row,'design'>>(
           `SELECT id,name,source_template,family,version,created_at,updated_at
            FROM okard_cloud_projects
            WHERE owner_issuer=$1 AND owner_subject=$2 AND deleted_at IS NULL
            ORDER BY updated_at DESC,id DESC LIMIT $3 OFFSET $4`,
           [owner.issuer,owner.subject,limit,offset],
-        ),
-        pool.query<{count:string}>(
+        );
+        const count=await client.query<{count:string}>(
           `SELECT count(*)::text as count FROM okard_cloud_projects
            WHERE owner_issuer=$1 AND owner_subject=$2 AND deleted_at IS NULL`,
           [owner.issuer,owner.subject],
-        ),
-      ]);
-      return {
-        items:rows.rows.map((r)=>({
-          id:r.id,name:r.name,sourceTemplate:r.source_template,version:r.version,
-          createdAt:iso(r.created_at),updatedAt:iso(r.updated_at),
-        })),
-        total:Number(count.rows[0]?.count??'0'),
-      };
+        );
+        return {
+          items:rows.rows.map((r)=>({
+            id:r.id,name:r.name,sourceTemplate:r.source_template,version:r.version,
+            createdAt:iso(r.created_at),updatedAt:iso(r.updated_at),
+          })),
+          total:Number(count.rows[0]?.count??'0'),
+        };
+      });
     },
     async get(owner,id) {
-      const result=await pool.query<Row>(
-        `SELECT ${SELECT_COLUMNS} FROM okard_cloud_projects
-          WHERE id=$1 AND owner_issuer=$2 AND owner_subject=$3 AND deleted_at IS NULL`,
-        [id,owner.issuer,owner.subject],
-      );
-      return result.rows[0]?mapRow(result.rows[0]):null;
+      return tx(pool,owner,async(client)=>{
+        const result=await client.query<Row>(
+          `SELECT ${SELECT_COLUMNS} FROM okard_cloud_projects
+            WHERE id=$1 AND owner_issuer=$2 AND owner_subject=$3 AND deleted_at IS NULL`,
+          [id,owner.issuer,owner.subject],
+        );
+        return result.rows[0]?mapRow(result.rows[0]):null;
+      });
     },
     async create(owner,project) {
-      return tx(pool,async(client):Promise<ProjectWriteResult>=>{
+      return tx(pool,owner,async(client):Promise<ProjectWriteResult>=>{
         await acquireOwnerLock(client,owner);
         if(!await hasCapacity(client,owner))return {status:'limit'};
         const inserted=await client.query<Row>(
@@ -122,7 +130,7 @@ export function createPostgresProjectStore(pool: Pool): CloudProjectStore {
       });
     },
     async save(owner,id,version,scene) {
-      const updated=await tx(pool,async(client)=>{
+      const updated=await tx(pool,owner,async(client)=>{
         const result=await client.query<Row>(
           `UPDATE okard_cloud_projects
            SET design=$1::jsonb,version=version+1,updated_at=now()
@@ -138,7 +146,7 @@ export function createPostgresProjectStore(pool: Pool): CloudProjectStore {
         classifyMissing(await store.get(owner,id));
     },
     async rename(owner,id,version,name) {
-      const updated=await tx(pool,async(client)=>{
+      const updated=await tx(pool,owner,async(client)=>{
         const result=await client.query<Row>(
           `UPDATE okard_cloud_projects
              SET name=$1,version=version+1,updated_at=now()
@@ -154,7 +162,7 @@ export function createPostgresProjectStore(pool: Pool): CloudProjectStore {
         classifyMissing(await store.get(owner,id));
     },
     async duplicate(owner,id,newId) {
-      return tx(pool,async(client):Promise<ProjectWriteResult>=>{
+      return tx(pool,owner,async(client):Promise<ProjectWriteResult>=>{
         await acquireOwnerLock(client,owner);
         if(!await hasCapacity(client,owner))return {status:'limit'};
         const source=await client.query<Row>(
@@ -180,7 +188,7 @@ export function createPostgresProjectStore(pool: Pool): CloudProjectStore {
       });
     },
     async remove(owner,id,version) {
-      const updated=await tx(pool,async(client)=>{
+      const updated=await tx(pool,owner,async(client)=>{
         const result=await client.query<Row>(
           `UPDATE okard_cloud_projects
            SET deleted_at=now(),version=version+1,updated_at=now()
