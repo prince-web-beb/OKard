@@ -1,5 +1,6 @@
 import { CARD_FAMILIES, type CardFamilyId, type CardSide } from '@okard/shared';
 export type { CardSide } from '@okard/shared';
+import { isIsoCountryCode, normalizeLocale } from '@okard/country-data';
 
 /** Canonical dimensions are millimetres; never CSS pixels. */
 export interface CardSize { widthMm: number; heightMm: number; bleedMm: number }
@@ -63,7 +64,9 @@ export type EditCommand =
   | { kind: 'duplicate'; side: CardSide; nodeId: string; newNodeId: string }
   | { kind: 'insert'; side: CardSide; node: SceneNode }
   | { kind: 'remove'; side: CardSide; nodeId: string }
-  | { kind: 'set-title'; title: string };
+  | { kind: 'set-title'; title: string }
+  | { kind: 'set-country'; countryCode: string | null }
+  | { kind: 'set-locale'; locale: string };
 export interface SchemaResult {
   valid: boolean;
   errors: string[];
@@ -151,8 +154,7 @@ export function validateCardDocument(raw: unknown): SchemaResult {
     errors.push('invalid project title');
   }
   if (!cardFamilyIds.has(String(raw.family))) errors.push('invalid card family');
-  if (!(raw.countryCode === null || (typeof raw.countryCode === 'string' &&
-      /^[A-Z]{2}$/.test(raw.countryCode)))) errors.push('invalid ISO country code');
+  if (!(raw.countryCode === null || isIsoCountryCode(raw.countryCode))) errors.push('invalid ISO country code');
   if (typeof raw.locale !== 'string' || !/^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8}){0,4}$/.test(raw.locale)) {
     errors.push('invalid locale');
   }
@@ -230,6 +232,10 @@ export function applyCardCommand(doc: CardDocument, command: EditCommand, now?: 
   const next = JSON.parse(JSON.stringify(doc)) as CardDocument;
   if (command.kind === 'set-title') {
     next.title = command.title;
+  } else if (command.kind === 'set-country') {
+    next.countryCode = command.countryCode;
+  } else if (command.kind === 'set-locale') {
+    next.locale = command.locale;
   } else {
     const artboard = next.artboards[command.side];
     if (!artboard) throw new CardSchemaError(['unknown card side']);
