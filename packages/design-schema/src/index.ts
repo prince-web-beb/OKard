@@ -220,7 +220,9 @@ export function createEmptyCardDocument(options: {
 /** One atomic copy-on-write command, suitable for history, undo and server optimistic concurrency. */
 export function applyCardCommand(doc: CardDocument, command: EditCommand, now?: string): CardDocument {
   assertCardDocument(doc);
-  const next = structuredClone(doc);
+  // Svelte 5 $state exposes proxies: structuredClone(proxy) throws DataCloneError.
+  // The schema is intentionally JSON-only, so round-trip is safe after validation.
+  const next = JSON.parse(JSON.stringify(doc)) as CardDocument;
   if (command.kind === 'set-title') {
     next.title = command.title;
   } else {
