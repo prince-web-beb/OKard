@@ -15,7 +15,8 @@
     "@okard/ai-gateway": "workspace:*",
     "@hono/node-server": "^2.1.0",
     "hono": "^4.10.0",
-    "@okard/country-data": "workspace:*"
+    "@okard/country-data": "workspace:*",
+    "@okard/templates": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.15.0",

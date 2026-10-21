@@ -3,6 +3,7 @@ import { secureHeaders } from 'hono/secure-headers';
 import { CARD_FAMILIES, PRODUCT_NAME, SCENE_SCHEMA_VERSION } from '@okard/shared';
 import { getServerAIStatus } from './ai.js';
 import { getCountryReference, listCountryReferences, normalizeLocale, ISO_COUNTRY_COUNT } from '@okard/country-data';
+import { getTemplate, listTemplates, getTemplateFamilyCoverage } from '@okard/templates';
 
 export const app = new Hono();
 
@@ -61,6 +62,32 @@ app.get('/api/v1/countries/:code', (c) => {
   return country
     ? c.json({ country, category: 'reference-only' })
     : c.json({ error: 'UNKNOWN_COUNTRY', message: 'This ISO country code is not available.' }, 404);
+});
+
+// Catalog responses expose non-sensitive design metadata only; no user photos.
+app.get('/api/v1/templates', (c) => {
+  const familyRaw = c.req.query('family');
+  const validFamily = familyRaw === undefined || familyRaw === 'all' ||
+    CARD_FAMILIES.some((entry) => entry.id === familyRaw);
+  if (!validFamily) {
+    return c.json({ error: 'UNKNOWN_CARD_FAMILY', message: 'Unknown card family.' }, 400);
+  }
+  const search = (c.req.query('search') ?? '').slice(0, 90);
+  const records = listTemplates({
+    family: (familyRaw ?? 'all') as Parameters<typeof listTemplates>[0]['family'],
+    search,
+  });
+  return c.json({
+    items: records, total: records.length,
+    coverage: getTemplateFamilyCoverage(),
+    issuedCredentialsEnabled: false,
+  });
+});
+app.get('/api/v1/templates/:id', (c) => {
+  const template = getTemplate(c.req.param('id'));
+  return template
+    ? c.json({ template, issuedCredentialsEnabled: false })
+    : c.json({ error: 'UNKNOWN_TEMPLATE', message: 'Template not found.' }, 404);
 });
 
 app.notFound((c) => c.json({ error: 'NOT_FOUND', message: 'This endpoint does not exist.' }, 404));

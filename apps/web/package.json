@@ -15,7 +15,8 @@
     "@okard/design-schema": "workspace:*",
     "@okard/render-engine": "workspace:*",
     "@okard/editor-engine": "workspace:*",
-    "@okard/country-data": "workspace:*"
+    "@okard/country-data": "workspace:*",
+    "@okard/templates": "workspace:*"
   },
   "devDependencies": {
     "@sveltejs/adapter-netlify": "^5.0.0",

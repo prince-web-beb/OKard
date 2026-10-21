@@ -8,7 +8,7 @@
     "node": ">=22 <25"
   },
   "scripts": {
-    "dev": "pnpm --filter @okard/shared build && pnpm --filter @okard/ai-gateway build && pnpm --filter @okard/country-data build && pnpm --filter @okard/design-schema build && pnpm --filter @okard/render-engine build && pnpm --filter @okard/editor-engine build && node scripts/orchestrate.mjs dev",
+    "dev": "pnpm --filter @okard/shared build && pnpm --filter @okard/ai-gateway build && pnpm --filter @okard/country-data build && pnpm --filter @okard/design-schema build && pnpm --filter @okard/render-engine build && pnpm --filter @okard/templates build && pnpm --filter @okard/editor-engine build && node scripts/orchestrate.mjs dev",
     "start": "node scripts/orchestrate.mjs start",
     "build": "pnpm -r --if-present build",
     "check": "pnpm -r --if-present check",

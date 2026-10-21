@@ -22,9 +22,10 @@
       <a href="#vision">The vision</a>
       <a href="#families">Card families</a>
       <a href="/countries">Worldwide</a>
+      <a href="/templates">Templates</a>
       <a href="/lab">Design lab</a>
     </nav>
-    <a class="topbar-cta" href="/lab">Open design lab <span aria-hidden="true">↗</span></a>
+    <a class="topbar-cta" href="/templates">Explore templates <span aria-hidden="true">↗</span></a>
   </header>
 
   <main>
@@ -35,7 +36,7 @@
         <h1>Identity, <em>beautifully</em> designed.</h1>
         <p class="hero-lede">A creative studio for the cards that represent your brand, your people, and your story. Original by design. Remarkable in every detail.</p>
         <div class="hero-actions">
-          <a class="btn-gold" href="/lab">Enter the design lab <span aria-hidden="true">↗</span></a>
+          <a class="btn-gold" href="/templates">Explore designs <span aria-hidden="true">↗</span></a>
           <a class="btn-quiet" href="/countries">Explore worldwide references <span aria-hidden="true">↗</span></a>
         </div>
         <div class="hero-footnote"><span class="footnote-line"></span> PREVIEW RELEASE · DEVELOPMENT IN PROGRESS</div>
@@ -84,7 +85,7 @@
           <div class="family-tile"><span class="family-number">0{index + 1}</span><strong>{category}</strong><span class="family-arrow" aria-hidden="true">✦</span></div>
         {/each}
       </div>
-      <div class="families-action"><a class="btn-gold" href="/lab">Explore the working design preview <span aria-hidden="true">↗</span></a></div>
+      <div class="families-action"><a class="btn-gold" href="/templates">Browse the card gallery <span aria-hidden="true">↗</span></a></div>
     </section>
   </main>
   <footer class="site-footer"><span class="brand mini"><span class="brand-glyph">O</span>Kard</span><span>PRIVATE BRAND DESIGN STUDIO</span><span>© {new Date().getFullYear()} OKard. Preview build.</span></footer>

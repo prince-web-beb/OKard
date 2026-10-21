@@ -45,4 +45,23 @@ describe('Hono foundation routes', () => {
     expect((await app.request('/api/v1/countries?limit=0')).status).toBe(400);
   });
 
+  it('exposes 18 distinct family templates with no activated credential claims', async () => {
+    const response = await app.request('/api/v1/templates');
+    const body = await response.json();
+    expect(response.status).toBe(200);
+    expect(body.total).toBe(18);
+    expect(body.coverage.complete).toBe(true);
+    expect(body.issuedCredentialsEnabled).toBe(false);
+    expect(new Set(body.items.map((t: { family: string }) => t.family)).size).toBe(18);
+  });
+  it('filters templates and rejects unknown families or template identifiers', async () => {
+    const response = await app.request('/api/v1/templates?family=events&search=summit');
+    const body = await response.json();
+    expect(body.total).toBe(1);
+    expect(body.items[0].family).toBe('events');
+    expect((await app.request('/api/v1/templates?family=invalid')).status).toBe(400);
+    expect((await app.request('/api/v1/templates/studio-identity')).status).toBe(200);
+    expect((await app.request('/api/v1/templates/unknown')).status).toBe(404);
+  });
+
 });
