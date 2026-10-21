@@ -56,3 +56,17 @@ test('blob URLs can be used only in browser preview, not portable exported SVG',
   assert.equal(renderCardSvg(doc,'front',{resolveAsset:()=>src,allowBlobPreview:true}).includes('<image'),true);
   assert.ok(preflightCardDocument(doc,{resolveAsset:()=>src}).some(i=>i.code==='UNEMBEDDED_IMAGE'));
 });
+
+
+test('interactive SVG provides selectable hit targets and a visible non-exported selection outline', () => {
+  const doc = createHamadCardDocument('royal');
+  const interactive = renderCardSvg(doc, 'front', {
+    interactive: true,
+    selectedLayerId: 'display-name',
+  });
+  assert.match(interactive, /data-okard-layer="display-name"/);
+  assert.match(interactive, /stroke="#42dfbd"/);
+  const exported = renderCardSvg(doc, 'front');
+  assert.doesNotMatch(exported, /data-okard-layer=/);
+  assert.doesNotMatch(exported, /stroke="#42dfbd"/);
+});
