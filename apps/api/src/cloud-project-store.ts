@@ -207,12 +207,19 @@ export function createCloudPool(databaseUrl: string, options: {ca?: string} = {}
   if(!['postgres:','postgresql:'].includes(address.protocol)) {
     throw new Error('DATABASE_URL must be PostgreSQL.');
   }
-  const local=new Set(['localhost','127.0.0.1','::1']).has(address.hostname);
+  const local=new Set(['localhost','127.0.0.1','[::1]']).has(address.hostname);
+  const sslmode=address.searchParams.get('sslmode');
+  // pg's URL sslmode can override explicit SSL options. Never allow a remote
+  // connection string to silently disable certificate verification.
+  if (!local && sslmode && sslmode !== 'verify-full') {
+    throw new Error('Remote PostgreSQL requires verified TLS (sslmode=verify-full).');
+  }
+  address.searchParams.delete('sslmode');
   const ssl=local?undefined:options.ca
     ? {rejectUnauthorized:true,ca:options.ca}
     : {rejectUnauthorized:true};
   return new Pool({
-    connectionString:databaseUrl,
+    connectionString:address.toString(),
     max:10, idleTimeoutMillis:30_000, connectionTimeoutMillis:5_000,
     ssl,
   });
