@@ -49,6 +49,16 @@
 
 **GitHub Actions state changed:** later OKard pushes now instantiate a named `typecheck-build-tests` job and end with `conclusion: failure` rather than solely synthetic `startup_failure`. Attempt to retrieve steps returned an empty array and GitHub job-log retrieval returned `BlobNotFound`. We **cannot identify the failing command or claim tests ran**. Representative run: https://github.com/prince-web-beb/OKard/actions/runs/39638284240. Keep CI and full monorepo verification **BLOCKED** until logs or a Replit online build are available; see `docs/CI_RECOVERY.md`.
 
+## 2026-10-21 — GLOBAL REFERENCES / NEW COUNTRY ATLAS CHECKPOINT
+
+**Files committed:** `packages/country-data/src/index.ts` plus package/tests, `apps/web/src/routes/countries/+page.svelte` with premium Android-first multilingual ISO index, `apps/web/src/routes/lab/+page.svelte` country/locale inspector + `?country=BE&locale=fr` selection, `apps/api/src/app.ts` public read-only reference routes and tests, `packages/design-schema/src/index.ts` strict valid ISO country codes and revisioned country/locale commands, all related package manifests/build scripts, `docs/WORLDWIDE_COUNTRY_REFERENCES.md`.
+
+**Coverage:** 249 unique ISO alpha-2 countries/territories (re-verified from GitHub). Node 22 Intl checked Belgium/Belgique and Arabic UAE, date/locale support. Country selection is a **presentation reference only**, never legal ID or nationality proof.
+
+**Not yet verified:** all new Node/package tests in a real pnpm workspace, Svelte SSR/lab hydration, Android Chrome/Samsung Internet, Replit/Netlify/Google deployed flows, country API over HTTP. GitHub Actions continues to show failures with unavailable run-step logs; `docs/CI_RECOVERY.md` describes recovery.
+
+**Next code tasks:** owner syncs Replit, obtains online package lockfile and completes Track 00.1 build/check/tests, then actual Android QA. After that, implement the complete 18-family template registry and real open/edit/export flows; subsequently server-backed auth/tenancy/project assets and localized sourced country profiles. Do not mark Track 08 complete yet. Do not alter OpenRouter PRIMARY / Gemini SECONDARY AI routing or Replit primary hosting.
+
 ## User intent, in plain language
 
 The owner wants **OKard Creator**, an original billion-dollar-quality **card creator website**, not an AI image-making chat and not just a HAMAD card. It must create, edit, save, reuse, preview and export many kinds of **front-and-back physical and digital private-brand cards** with high-end luxury design. A specific inspiration is previous portrait-heavy metallic marriage-member card front/back artwork; the actual platform must reproduce this quality through **code-based editable designs**. The owner studies visual designs first before implementing new kinds of card features. The owner specifically said **NO Next.js** and **Android must be first-class from day one**. Modern, stable programming tech, animation, professional layout, international references, AI tools in the roadmap, admin controls, no shortcuts, no fake workflows or unimplemented buttons.
