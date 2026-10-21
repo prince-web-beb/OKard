@@ -19,8 +19,8 @@
   function handlePhoto(event: Event) {
     const file = (event.currentTarget as HTMLInputElement).files?.[0];
     if (!file) return;
-    if (!file.type.startsWith('image/') || file.size > 8 * 1024 * 1024) {
-      uploadError = 'Choose a supported image smaller than 8 MB.';
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type) || file.size > 8 * 1024 * 1024) {
+      uploadError = 'Choose a JPEG, PNG or WebP portrait smaller than 8 MB.';
       return;
     }
     if (portraitUrl) URL.revokeObjectURL(portraitUrl);
@@ -128,7 +128,7 @@
         <div class="panel-group"><label for="displayName">Display name</label><input id="displayName" type="text" maxlength="22" autocomplete="off" spellcheck="false" bind:value={displayName} placeholder="HAMAD" /></div>
         <div class="panel-group">
           <label for="portrait">Portrait photo</label>
-          <input id="portrait" type="file" accept="image/*" onchange={handlePhoto} aria-describedby="portraitHint" />
+          <input id="portrait" type="file" accept="image/jpeg,image/png,image/webp" onchange={handlePhoto} aria-describedby="portraitHint" />
           <span class="input-hint" id="portraitHint">Local preview only · no face edits · max 8 MB</span>
           {#if uploadError}<p class="field-error" role="alert">{uploadError}</p>{/if}
           {#if portraitUrl}<button class="text-action" type="button" onclick={removePhoto}>Remove uploaded photo</button>{/if}
