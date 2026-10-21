@@ -18,9 +18,10 @@ export interface PreflightIssue {
   message: string;
 }
 export function escapeXml(input: string): string {
-  return input.replace(/[&<>"']/g, (char) => ({
+  const entities: Record<string, string> = {
     '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;',
-  })[char] || '');
+  };
+  return input.replace(/[&<>"']/g, (char) => entities[char] ?? '');
 }
 const finite = (n: number) => Number.isFinite(n) ? String(Number(n.toFixed(3))) : '0';
 const dataImage = /^data:image\/(?:jpeg|png|webp);base64,[A-Za-z0-9+/=]+$/;
