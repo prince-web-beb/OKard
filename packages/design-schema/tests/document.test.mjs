@@ -84,3 +84,12 @@ test('unknown layer kinds, unsupported schema versions and duplicate IDs are blo
   doc.artboards.front.nodes.push(structuredClone(doc.artboards.front.nodes[0]));
   assert.equal(validateCardDocument(doc).valid,false);
 });
+
+test('editing a reactive Proxy document works without structuredClone DataCloneError', () => {
+  const proxied = new Proxy(createHamadCardDocument('royal'), {});
+  const edited = applyCardCommand(proxied, {
+    kind: 'replace-text', side: 'front', nodeId: 'display-name', text: 'UPDATED',
+  });
+  assert.equal(edited.artboards.front.nodes.find(n => n.id === 'display-name').text, 'UPDATED');
+  assert.equal(proxied.revision, 0);
+});
