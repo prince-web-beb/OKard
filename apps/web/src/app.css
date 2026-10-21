@@ -332,3 +332,65 @@ em { font-weight: 400; color: var(--gold-pale); }
 @media (max-width: 480px) {
   .lab-import-control { font-size: 11px; }
 }
+
+
+/* Android-first card editing: pointer capture is limited to the artboard.
+   Numeric layer coordinates remain available for keyboard/screen-reader users. */
+.artwork-stage {
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transform-origin: center center;
+  cursor: default;
+}
+.artwork-stage [data-okard-layer] {
+  cursor: grab;
+}
+.artwork-stage.dragging [data-okard-layer] { cursor: grabbing; }
+.canvas-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 19px;
+}
+.canvas-tools > span {
+  font-size: 12px;
+  line-height: 1.45;
+  color: #b6b4b5;
+}
+.zoom-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  border-radius: 11px;
+  background: #11141b;
+  border: 1px solid var(--line);
+  padding: 5px;
+}
+.zoom-controls button {
+  min-width: 44px;
+  min-height: 44px;
+  background: transparent;
+  color: #e3d3b6;
+  border: none;
+  border-radius: 6px;
+  font-size: 18px;
+  font-weight: 700;
+}
+.zoom-controls button:last-child { padding: 0 9px; font-size: 12px; }
+.zoom-controls button:hover:not(:disabled) { background: rgba(197,165,111,.15); }
+.zoom-controls output {
+  min-width: 50px;
+  text-align: center;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: #e4d5b7;
+}
+@media (max-width: 560px) {
+  .canvas-tools { display: grid; justify-content: stretch; }
+  .canvas-tools > span { text-align: center; font-size: 11px; }
+  .zoom-controls { justify-content: center; }
+  .svg-preview-wrap { overflow: clip; }
+}
