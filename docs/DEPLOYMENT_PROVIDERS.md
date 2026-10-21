@@ -1,7 +1,7 @@
 # OKard — Replit / Netlify / Google provider topology
 
 **Status: Source configuration added; live resources and deployments NOT provisioned or verified.**
-**Decision:** Replit primary full-stack; Netlify alternate frontend; Google Cloud secondary backend, with Google Gemini as a separately configured future AI fallback.
+**Decision:** Replit primary full-stack; Netlify alternate frontend; Google Cloud secondary backend. **OpenRouter is the primary AI gateway; Google Gemini is the secondary AI fallback.**
 
 ## Deployment roles (keep these separate)
 
@@ -13,7 +13,7 @@
 | Background jobs | Replit workspace / separate reserved compute later | Google Cloud task/worker service later | Worker entry point ONLY; no BullMQ queue connected |
 | Persistent database | PostgreSQL service chosen after procurement | Cloud SQL PostgreSQL option | NOT CONNECTED; do not save user files/projects yet |
 | Files | Private S3-compatible storage adapter | Google Cloud Storage adapter later | NOT CONNECTED |
-| AI assistant | Primary selected provider TBD, opt-in only | Google Gemini with Google API key | NOT IMPLEMENTED, no AI calls are active |
+| AI assistant | **OpenRouter primary gateway** (server-only source added) | **Google Gemini secondary** (transient fallback) | Gateway library exists with mock tests; no live AI endpoints, keys or paid calls |
 | Backups / DR | Dedicated backup strategy and provider | Cross-provider copies only after legal/data residency review | NOT IMPLEMENTED |
 
 `DEPLOY_TARGET` selects the **web adapter**, not user identity or cloud failover. `OKARD_API_URL` selects the backend for SSR. Never hard-code actual API hostnames or keys into the shipped client bundle.
@@ -52,8 +52,10 @@
 - **No deployed Cloud Run URL or project is assumed.** Ask owner/team for actual destination when starting deployment.
 - For public browser-facing domains, place an authenticated/gated edge in front of the API. Metadata routes alone do not justify exposing future member mutations.
 
-### Google Gemini AI secondary
-- Google is a **second provider** (behind a provider-neutral adapter). Add `GOOGLE_GENERATIVE_AI_API_KEY` or a service-identity secret only when Track 10 implements policy-protected AI gateway.
+### AI routing: OpenRouter primary, Google Gemini secondary
+- **OpenRouter is the first AI provider.** The server-only `@okard/ai-gateway` package posts to OpenRouter chat completions using `OPENROUTER_API_KEY` and explicitly selected `OPENROUTER_MODEL`.
+- **Google Gemini is the second AI provider**, used only on permitted transient OpenRouter failures when `AI_FALLBACK_ENABLED=true`, `GOOGLE_GENERATIVE_AI_API_KEY` and `GOOGLE_MODEL` are configured.
+- The provider gateway is **implemented in source** but exposed to no public AI route, since authorization, quota and audit have not yet shipped.
 - Do not ship Google's secret to the client. User must approve any structured scene-graph edits. AI failure must never break manual editing.
 - Secondary provider is **not automatically live** until configured, validated, rate-limited and billed safely.
 
@@ -83,8 +85,10 @@ Open `http://localhost:3000` (Replit externally maps its web port). Visit `/lab`
 | `DATABASE_URL` | API/worker secrets only, once built | Persistent storage |
 | `REDIS_URL` | API/worker secrets only, once built | Queue/cache |
 | `GOOGLE_CLOUD_PROJECT` | Google service identity or CI | Secondary cloud account |
-| `GOOGLE_GENERATIVE_AI_API_KEY` | AI server secrets only | Future Gemini AI adapter |
-| `AI_PROVIDER_PRIMARY` / `AI_PROVIDER_SECONDARY` | Server only | Future model routing preferences |
+| `OPENROUTER_API_KEY` + `OPENROUTER_MODEL` | AI server secrets only | PRIMARY AI model gateway, no default model slug |
+| `GOOGLE_GENERATIVE_AI_API_KEY` + `GOOGLE_MODEL` | AI server secrets only | SECONDARY Gemini AI gateway on transient failure |
+| `AI_FALLBACK_ENABLED` | AI server settings | Explicit fallback switch, disabled until budgets/auth ready |
+| `AI_REQUEST_TIMEOUT_MS` / `AI_MAX_OUTPUT_TOKENS` | AI server settings | Per-call bounded provider time and output |
 
 ## Outstanding release blockers
 
@@ -93,6 +97,6 @@ Open `http://localhost:3000` (Replit externally maps its web port). Visit `/lab`
 - [ ] Validate SvelteKit SSR Netlify adapter, host and proxy in an actual Netlify preview.
 - [ ] Build and validate Dockerfile and Cloud Run endpoint in a Google project.
 - [ ] Add proper authentication, DB, asset storage, background queue and compliant issuer rules.
-- [ ] Add AI gateway adapters and policy/quotas; currently none runs.
+- [ ] Finish AI integration: typed OpenRouter/Gemini adapter exists with mock tests; authenticating endpoints, policies, quotas, live model calls and scene edit approvals are NOT live. See `docs/AI_PROVIDER_ROUTING.md`.
 - [ ] Test on real Android devices and check actual bundle/performance.
 - [ ] Establish DNS, data custody, security and backup policy before production.
