@@ -155,8 +155,9 @@ export function validateCardDocument(raw: unknown): SchemaResult {
   }
   if (!cardFamilyIds.has(String(raw.family))) errors.push('invalid card family');
   if (!(raw.countryCode === null || isIsoCountryCode(raw.countryCode))) errors.push('invalid ISO country code');
-  if (typeof raw.locale !== 'string' || !/^[a-zA-Z]{2,3}(?:-[a-zA-Z0-9]{2,8}){0,4}$/.test(raw.locale)) {
-    errors.push('invalid locale');
+  if (typeof raw.locale !== 'string' || !raw.locale ||
+      normalizeLocale(raw.locale, '') !== raw.locale) {
+    errors.push('invalid canonical BCP 47 locale');
   }
   if (typeof raw.revision !== 'number' || !Number.isSafeInteger(raw.revision) || raw.revision < 0) errors.push('invalid revision');
   if (typeof raw.updatedAt !== 'string' || !/^\d{4}-\d\d-\d\dT/.test(raw.updatedAt) ||
