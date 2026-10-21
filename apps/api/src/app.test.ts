@@ -18,6 +18,13 @@ describe('Hono foundation routes', () => {
       publicAccessEnabled: false,
     });
   });
+  it('never permits anonymous cloud project CRUD', async () => {
+    const response = await app.request('/api/v1/cloud/projects');
+    // 503 when cloud is feature-gated, 401 when real OIDC is provisioned.
+    expect([401,503]).toContain(response.status);
+    expect(response.status).not.toBe(200);
+    expect(response.status).not.toBe(201);
+  });
   it('returns an explicit 404 error', async () => {
     const response = await app.request('/missing');
     expect(response.status).toBe(404);
