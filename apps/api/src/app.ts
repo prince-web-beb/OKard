@@ -12,14 +12,29 @@ export const app = new Hono();
 app.use('*', secureHeaders());
 
 app.get('/health/live', (c) => c.json({ status: 'ok', service: 'okard-api' }));
-app.get('/health/ready', (c) =>
-  c.json({
-    status: 'foundation-only',
-    service: 'okard-api',
-    storage: 'not-connected',
-    database: 'not-connected',
-  }),
-);
+let cloudHealthPool: ReturnType<typeof createCloudPool> | null = null;
+app.get('/health/ready', async (c) => {
+  if (!cloudHealthPool) {
+    return c.json({
+      status: 'foundation-only', service: 'okard-api',
+      cloudProjects: 'disabled', database: 'not-connected',
+    });
+  }
+  try {
+    // Fail readiness when schema migration has not been applied.
+    await cloudHealthPool.query('SELECT id FROM okard_cloud_projects LIMIT 0');
+    return c.json({
+      status: 'cloud-storage-connected', service: 'okard-api',
+      cloudProjects: 'configured', database: 'connected',
+      note: 'Provider login, issuer keys and browser sync require separate end-to-end validation.',
+    });
+  } catch {
+    return c.json({
+      status: 'not-ready', service: 'okard-api',
+      cloudProjects: 'configured', database: 'unavailable',
+    },503);
+  }
+});
 
 app.get('/api/v1/meta', (c) =>
   c.json({
@@ -29,6 +44,7 @@ app.get('/api/v1/meta', (c) =>
     cardFamiliesAvailableForDesign: CARD_FAMILIES.length,
     countryReferencesAvailable: ISO_COUNTRY_COUNT,
     issuedCredentialsEnabled: false,
+    cloudProjectApiConfigured: cloudReady,
     ai: {
       primary: getServerAIStatus().primary,
       secondary: getServerAIStatus().secondary,
@@ -112,6 +128,7 @@ if (cloudReady) {
   const database = createCloudPool(cloudConfig.databaseUrl, {
     ca: process.env.OKARD_DATABASE_CA_CERT,
   });
+  cloudHealthPool = database;
   const store = createPostgresProjectStore(database);
   app.route('/api/v1/cloud/projects',createCloudProjectRoutes({
     store,verifyToken:verifier,
