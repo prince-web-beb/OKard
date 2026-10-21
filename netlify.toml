@@ -2,7 +2,7 @@
 # In Netlify UI set OKARD_API_URL to a reachable HTTPS API (Replit API or Google Cloud Run).
 # Adapter-Netlify generates SSR routing; no SPA catch-all redirect is appropriate here.
 [build]
-  command = "corepack pnpm install --no-frozen-lockfile && corepack pnpm --filter @okard/shared build && corepack pnpm --filter @okard/web build"
+  command = "corepack pnpm install --no-frozen-lockfile && corepack pnpm build"
   publish = "apps/web/build"
 
 [build.environment]
@@ -10,4 +10,4 @@
   NODE_VERSION = "22"
 
 [context.deploy-preview]
-  command = "corepack pnpm install --no-frozen-lockfile && corepack pnpm --filter @okard/shared build && corepack pnpm --filter @okard/web build"
+  command = "corepack pnpm install --no-frozen-lockfile && corepack pnpm build"

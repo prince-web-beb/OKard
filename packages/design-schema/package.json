@@ -17,7 +17,8 @@
     "test": "pnpm build && node --test tests/*.test.mjs"
   },
   "dependencies": {
-    "@okard/shared": "workspace:*"
+    "@okard/shared": "workspace:*",
+    "@okard/country-data": "workspace:*"
   },
   "devDependencies": {
     "typescript": "^5.9.0"

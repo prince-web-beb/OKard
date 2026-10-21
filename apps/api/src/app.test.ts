@@ -28,4 +28,21 @@ describe('Hono foundation routes', () => {
     const body = await response.json();
     expect(body.total).toBeGreaterThanOrEqual(18);
   });
+  it('lists 249 ISO references without asserting official ID authority', async () => {
+    const response = await app.request('/api/v1/countries');
+    const payload = await response.json();
+    expect(response.status).toBe(200);
+    expect(payload.total).toBe(249);
+    expect(payload.officialIdentityVerification).toBe(false);
+    expect(payload.items).toHaveLength(249);
+  });
+  it('supports localized country search and valid/invalid ISO lookups', async () => {
+    const response = await app.request('/api/v1/countries?locale=fr&search=Belgique&limit=5');
+    expect(response.status).toBe(200);
+    expect((await response.json()).items[0].code).toBe('BE');
+    expect((await app.request('/api/v1/countries/NG')).status).toBe(200);
+    expect((await app.request('/api/v1/countries/ZZ')).status).toBe(404);
+    expect((await app.request('/api/v1/countries?limit=0')).status).toBe(400);
+  });
+
 });
