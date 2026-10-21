@@ -71,6 +71,9 @@
 
 **Progress:** Track 07 is **partially implemented in source** but **NOT VERIFIED**. Template creation/publishing/versioning, admin management, full font/shaping, manufacturing proof, authenticated persistence and browser/mobile QA remain open. **Do not mark Track 07 as completed**. Track 00.1 remains blocked until Replit sync or an online build runner produces successful evidence.
 
+
+**Post-checkpoint QA hardening:** The SVG renderer now namespaces clipPath IDs per document and card side to prevent collage/gallery clipping collisions; matching test added. Gallery CSS progressively defers offscreen rendering using `content-visibility:auto` on supported Android browsers. These remain source-only until full browser validation.
+
 ## Progress accounting and status legend
 
 - [ ] means **not verified done**. Do not change to [x] for a design mock or speculative code.
