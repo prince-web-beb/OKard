@@ -55,6 +55,12 @@ export type EditCommand =
   | { kind: 'set-opacity'; side: CardSide; nodeId: string; opacity: number }
   | { kind: 'set-image'; side: CardSide; nodeId: string; assetId: string }
   | { kind: 'move'; side: CardSide; nodeId: string; xMm: number; yMm: number }
+  | { kind: 'resize'; side: CardSide; nodeId: string; widthMm: number; heightMm: number }
+  | { kind: 'rotate'; side: CardSide; nodeId: string; rotationDeg: number }
+  | { kind: 'set-color'; side: CardSide; nodeId: string; color: string }
+  | { kind: 'set-locked'; side: CardSide; nodeId: string; locked: boolean }
+  | { kind: 'reorder'; side: CardSide; nodeId: string; direction: 'up' | 'down' }
+  | { kind: 'duplicate'; side: CardSide; nodeId: string; newNodeId: string }
   | { kind: 'insert'; side: CardSide; node: SceneNode }
   | { kind: 'remove'; side: CardSide; nodeId: string }
   | { kind: 'set-title'; title: string };
@@ -235,9 +241,38 @@ export function applyCardCommand(doc: CardDocument, command: EditCommand, now?: 
       const nodeIndex = artboard.nodes.findIndex((n) => n.id === command.nodeId);
       if (nodeIndex < 0) throw new CardSchemaError(['unknown layer id']);
       const node = artboard.nodes[nodeIndex]!;
-      if (node.locked) throw new CardSchemaError(['layer is locked']);
+      if (node.locked && command.kind !== 'set-locked') {
+        throw new CardSchemaError(['layer is locked']);
+      }
+      if (command.kind === 'set-locked') node.locked = command.locked;
       if (command.kind === 'remove') artboard.nodes.splice(nodeIndex, 1);
       if (command.kind === 'move') { node.xMm = command.xMm; node.yMm = command.yMm; }
+      if (command.kind === 'resize') {
+        node.widthMm = command.widthMm;
+        node.heightMm = command.heightMm;
+      }
+      if (command.kind === 'rotate') node.rotationDeg = command.rotationDeg;
+      if (command.kind === 'set-color') {
+        if (node.kind === 'image') throw new CardSchemaError(['image has no fill color']);
+        node.fill = command.color;
+      }
+      if (command.kind === 'duplicate') {
+        if (artboard.nodes.some((n) => n.id === command.newNodeId)) {
+          throw new CardSchemaError(['duplicate node id']);
+        }
+        const copy = JSON.parse(JSON.stringify(node)) as SceneNode;
+        copy.id = command.newNodeId;
+        copy.xMm += 1.5;
+        copy.yMm += 1.5;
+        artboard.nodes.splice(nodeIndex + 1, 0, copy);
+      }
+      if (command.kind === 'reorder') {
+        const target = nodeIndex + (command.direction === 'up' ? 1 : -1);
+        if (target >= 0 && target < artboard.nodes.length) {
+          const item = artboard.nodes.splice(nodeIndex, 1)[0]!;
+          artboard.nodes.splice(target, 0, item);
+        }
+      }
       if (command.kind === 'set-opacity') node.opacity = command.opacity;
       if (command.kind === 'set-image') {
         if (node.kind !== 'image') throw new CardSchemaError(['target must be an image layer']);
