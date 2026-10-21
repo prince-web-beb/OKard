@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createHamadCardDocument, applyCardCommand, serializeCardDocument,
   parseCardDocument } from '@okard/design-schema';
 import { renderCardSvg } from '@okard/render-engine';
+import { listCountryReferences, getCountryReference } from '@okard/country-data';
 
 /** Integration contract used by the Svelte /lab route; no browser/node secrets. */
 describe('OKard design lab integration', () => {
@@ -37,4 +38,15 @@ describe('OKard design lab integration', () => {
     expect(svg).toContain('&lt;iframe');
     expect(svg).toContain('85.6mm');
   });
+  it('preserves legitimate country and locale metadata across card serialization', () => {
+    let doc = createHamadCardDocument('royal');
+    doc = applyCardCommand(doc, {kind:'set-country',countryCode:'NG'});
+    doc = applyCardCommand(doc, {kind:'set-locale',locale:'en-NG'});
+    const restored = parseCardDocument(serializeCardDocument(doc));
+    expect(restored.countryCode).toBe('NG');
+    expect(restored.locale).toBe('en-NG');
+    expect(getCountryReference('NG')?.name).toBe('Nigeria');
+    expect(listCountryReferences('en')).toHaveLength(249);
+  });
+
 });

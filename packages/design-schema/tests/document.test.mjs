@@ -140,3 +140,26 @@ test('unsupported image fill, duplicate IDs and invalid resize fail atomically',
   }),CardSchemaError);
   assert.equal(doc.revision,0);
 });
+
+test('country and locale edit commands preserve both card sides and revisions', () => {
+  let doc = createHamadCardDocument('royal');
+  const front = structuredClone(doc.artboards.front);
+  const back = structuredClone(doc.artboards.back);
+  doc = applyCardCommand(doc, {kind:'set-country',countryCode:'BE'});
+  doc = applyCardCommand(doc, {kind:'set-locale',locale:'fr-BE'});
+  assert.equal(doc.countryCode, 'BE');
+  assert.equal(doc.locale, 'fr-BE');
+  assert.equal(doc.revision,2);
+  assert.deepEqual(doc.artboards.front,front);
+  assert.deepEqual(doc.artboards.back,back);
+});
+test('invalid ISO references are rejected and do not mutate original', () => {
+  const original = createHamadCardDocument('imperial');
+  for (const code of ['ZZ','UK','XK','NN']) {
+    assert.throws(() => applyCardCommand(original, {
+      kind:'set-country',countryCode:code,
+    }),CardSchemaError);
+  }
+  assert.equal(original.countryCode,null);
+  assert.equal(original.revision,0);
+});

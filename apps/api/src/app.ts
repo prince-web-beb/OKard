@@ -24,6 +24,7 @@ app.get('/api/v1/meta', (c) =>
     schemaVersion: SCENE_SCHEMA_VERSION,
     stage: 'foundation',
     cardFamiliesAvailableForDesign: CARD_FAMILIES.length,
+    countryReferencesAvailable: ISO_COUNTRY_COUNT,
     issuedCredentialsEnabled: false,
     ai: {
       primary: getServerAIStatus().primary,

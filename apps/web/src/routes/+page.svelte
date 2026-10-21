@@ -21,6 +21,7 @@
     <nav class="desktop-nav" aria-label="Primary navigation">
       <a href="#vision">The vision</a>
       <a href="#families">Card families</a>
+      <a href="/countries">Worldwide</a>
       <a href="/lab">Design lab</a>
     </nav>
     <a class="topbar-cta" href="/lab">Open design lab <span aria-hidden="true">↗</span></a>
@@ -35,7 +36,7 @@
         <p class="hero-lede">A creative studio for the cards that represent your brand, your people, and your story. Original by design. Remarkable in every detail.</p>
         <div class="hero-actions">
           <a class="btn-gold" href="/lab">Enter the design lab <span aria-hidden="true">↗</span></a>
-          <a class="btn-quiet" href="#families">Explore the possibilities <span aria-hidden="true">↓</span></a>
+          <a class="btn-quiet" href="/countries">Explore worldwide references <span aria-hidden="true">↗</span></a>
         </div>
         <div class="hero-footnote"><span class="footnote-line"></span> PREVIEW RELEASE · DEVELOPMENT IN PROGRESS</div>
       </div>
