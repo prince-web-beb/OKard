@@ -33,6 +33,53 @@ CREATE TABLE IF NOT EXISTS okard_cloud_project_audit (
 CREATE INDEX IF NOT EXISTS okard_project_audit_owner_idx
   ON okard_cloud_project_audit(owner_issuer, owner_subject, created_at DESC);
 
+-- Defense in depth: even an accidentally unscoped SQL query cannot read or
+-- mutate another user's scenes. The API sets both claims using SET LOCAL in
+-- each transaction, after validating a signed issuer/audience access token.
+ALTER TABLE okard_cloud_projects ENABLE ROW LEVEL SECURITY;
+ALTER TABLE okard_cloud_projects FORCE ROW LEVEL SECURITY;
+ALTER TABLE okard_cloud_project_audit ENABLE ROW LEVEL SECURITY;
+ALTER TABLE okard_cloud_project_audit FORCE ROW LEVEL SECURITY;
+
+DO $
+BEGIN
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = current_schema()
+      AND tablename = 'okard_cloud_projects'
+      AND policyname = 'okard_projects_owner_v1'
+  ) THEN
+    CREATE POLICY okard_projects_owner_v1 ON okard_cloud_projects
+      FOR ALL
+      USING (
+        owner_issuer = current_setting('okard.owner_issuer', true)
+        AND owner_subject = current_setting('okard.owner_subject', true)
+      )
+      WITH CHECK (
+        owner_issuer = current_setting('okard.owner_issuer', true)
+        AND owner_subject = current_setting('okard.owner_subject', true)
+      );
+  END IF;
+  IF NOT EXISTS (
+    SELECT 1 FROM pg_policies
+    WHERE schemaname = current_schema()
+      AND tablename = 'okard_cloud_project_audit'
+      AND policyname = 'okard_audit_owner_v1'
+  ) THEN
+    CREATE POLICY okard_audit_owner_v1 ON okard_cloud_project_audit
+      FOR ALL
+      USING (
+        owner_issuer = current_setting('okard.owner_issuer', true)
+        AND owner_subject = current_setting('okard.owner_subject', true)
+      )
+      WITH CHECK (
+        owner_issuer = current_setting('okard.owner_issuer', true)
+        AND owner_subject = current_setting('okard.owner_subject', true)
+      );
+  END IF;
+END
+$;
+
 -- Database role used by the web API should have SELECT/INSERT/UPDATE on
 -- okard_cloud_projects, SELECT/INSERT on audit, USAGE on audit sequence,
 -- and NO table-level DDL/DROP/DELETE grants.
