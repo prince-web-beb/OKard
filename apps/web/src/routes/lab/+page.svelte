@@ -4,6 +4,9 @@
     type EditCommand, type HamadEdition, parseCardDocument } from '@okard/design-schema';
   import { renderCardSvg, preflightCardDocument } from '@okard/render-engine';
   import type { CardSide } from '@okard/shared';
+  import { screenToMillimetres, movedLayerPosition, distance, center,
+    nextPinchTransform, clampZoom, type MmPoint, type ScreenPoint,
+    type PinchTransform } from '@okard/editor-engine';
 
   const editions: { id: HamadEdition; title: string; color: string }[] = [
     { id: 'royal', title: 'Royal Signature', color: '#d7b67b' },
@@ -22,10 +25,32 @@
   let errorText = $state('');
   let undoHistory = $state<CardDocument[]>([]);
   let redoHistory = $state<CardDocument[]>([]);
+  type Drag = {
+    pointerId: number; side: CardSide; nodeId: string;
+    origin: { xMm: number; yMm: number; widthMm: number; heightMm: number };
+    start: MmPoint; next: MmPoint;
+  };
+  let dragging = $state<Drag | null>(null);
+  let zoom = $state(1);
+  let panX = $state(0);
+  let panY = $state(0);
+  const pointers = new Map<number, ScreenPoint>();
+  let pinchStart: { distance: number; midpoint: ScreenPoint; transform: PinchTransform } | null = null;
 
   const assetUrl = (assetId: string) => assetId === 'portrait' ? photoUrl : null;
-  const previewSvg = $derived(renderCardSvg(card, side,
-    { resolveAsset: assetUrl, allowBlobPreview: true }));
+  const displayCard = $derived.by(() => {
+    if (!dragging || dragging.side !== side) return card;
+    try {
+      return applyCardCommand(card, {
+        kind: 'move', side: dragging.side, nodeId: dragging.nodeId,
+        xMm: dragging.next.xMm, yMm: dragging.next.yMm,
+      }, card.updatedAt);
+    } catch { return card; }
+  });
+  const previewSvg = $derived(renderCardSvg(displayCard, side, {
+    resolveAsset: assetUrl, allowBlobPreview: true, interactive: true,
+    selectedLayerId: layerId,
+  }));
   const preflight = $derived(preflightCardDocument(card, { resolveAsset: assetUrl }));
   const availableLayers = $derived(card.artboards[side].nodes.filter((node) =>
     !node.id.includes('disclaimer') && node.id !== 'back-notice' &&
@@ -39,6 +64,109 @@
     node.id === 'secondary-portrait'));
   const secondaryOpacity = $derived(secondaryLayer?.opacity ?? 0.12);
 
+  /**
+   * One-finger touch / mouse: select & move an editable layer.
+   * Two fingers: pinch zoom and pan without modifying scene history.
+   * A single immutable card command is committed only when a drag finishes.
+   */
+  function getArtboard(container: HTMLDivElement): SVGSVGElement | null {
+    return container.querySelector<SVGSVGElement>('svg');
+  }
+  function pointerToMm(event: PointerEvent, container: HTMLDivElement): MmPoint | null {
+    const svg = getArtboard(container);
+    return svg ? screenToMillimetres(event, svg.getBoundingClientRect(), card.size) : null;
+  }
+  function clearGesture() {
+    dragging = null;
+    pointers.clear();
+    pinchStart = null;
+  }
+  function handlePointerDown(event: PointerEvent) {
+    if (event.pointerType === 'mouse' && event.button !== 0) return;
+    const container = event.currentTarget as HTMLDivElement;
+    const client = { clientX: event.clientX, clientY: event.clientY };
+    pointers.set(event.pointerId, client);
+    container.setPointerCapture(event.pointerId);
+    if (pointers.size > 1) {
+      dragging = null;
+      const pair = [...pointers.values()].slice(0, 2);
+      if (pair[0] && pair[1]) {
+        pinchStart = {
+          distance: Math.max(1, distance(pair[0], pair[1])),
+          midpoint: center(pair[0], pair[1]),
+          transform: { zoom, panX, panY },
+        };
+      }
+      return;
+    }
+    const target = event.target instanceof Element
+      ? event.target.closest('[data-okard-layer]') : null;
+    const id = target?.getAttribute('data-okard-layer');
+    const node = id ? availableLayers.find((candidate) => candidate.id === id) : undefined;
+    if (!node || node.locked) return;
+    const start = pointerToMm(event, container);
+    if (!start) return;
+    layerId = node.id;
+    dragging = {
+      pointerId: event.pointerId, side, nodeId: node.id,
+      origin: { xMm: node.xMm, yMm: node.yMm,
+        widthMm: node.widthMm, heightMm: node.heightMm },
+      start, next: { xMm: node.xMm, yMm: node.yMm },
+    };
+  }
+  function handlePointerMove(event: PointerEvent) {
+    if (!pointers.has(event.pointerId)) return;
+    pointers.set(event.pointerId, { clientX: event.clientX, clientY: event.clientY });
+    if (pointers.size > 1 && pinchStart) {
+      const pair = [...pointers.values()].slice(0, 2);
+      if (!pair[0] || !pair[1]) return;
+      const updated = nextPinchTransform(
+        pinchStart.transform, pinchStart.distance, pinchStart.midpoint,
+        pair[0], pair[1],
+      );
+      zoom = updated.zoom;
+      panX = updated.panX;
+      panY = updated.panY;
+      return;
+    }
+    if (!dragging || dragging.pointerId !== event.pointerId || dragging.side !== side) return;
+    const mm = pointerToMm(event, event.currentTarget as HTMLDivElement);
+    if (!mm) return;
+    const next = movedLayerPosition(dragging.origin, dragging.start, mm, card.size);
+    if (next.xMm !== dragging.next.xMm || next.yMm !== dragging.next.yMm) {
+      dragging = { ...dragging, next };
+    }
+  }
+  function handlePointerUp(event: PointerEvent) {
+    pointers.delete(event.pointerId);
+    const complete = dragging?.pointerId === event.pointerId ? dragging : null;
+    dragging = null;
+    if (pointers.size < 2) pinchStart = null;
+    if (complete &&
+      (Math.abs(complete.next.xMm - complete.origin.xMm) > 0.01 ||
+       Math.abs(complete.next.yMm - complete.origin.yMm) > 0.01)) {
+      change({
+        kind: 'move', side: complete.side, nodeId: complete.nodeId,
+        xMm: complete.next.xMm, yMm: complete.next.yMm,
+      });
+      notice = 'Layer positioned on the 0.25 mm grid.';
+    }
+    const container = event.currentTarget as HTMLDivElement;
+    if (container.hasPointerCapture(event.pointerId)) {
+      container.releasePointerCapture(event.pointerId);
+    }
+  }
+  function handlePointerCancel(event: PointerEvent) {
+    pointers.delete(event.pointerId);
+    dragging = null;
+    if (pointers.size < 2) pinchStart = null;
+  }
+  function resetCanvasView() {
+    clearGesture();
+    zoom = 1;
+    panX = 0;
+    panY = 0;
+  }
   function change(command: EditCommand) {
     try {
       const updated = applyCardCommand(card, command);
@@ -68,12 +196,14 @@
     notice = 'Edit restored.';
   }
   function chooseSide(next: CardSide) {
+    clearGesture();
     side = next;
     layerId = next === 'front' ? 'display-name' : 'back-motto';
   }
   function chooseEdition(next: HamadEdition) {
     if (edition === next) return;
     const carryName = displayName;
+    resetCanvasView();
     edition = next;
     card = createHamadCardDocument(edition, carryName);
     undoHistory = [];
@@ -213,8 +343,24 @@
           <span>85.60 × 53.98 MM · {side.toUpperCase()} · REV {card.revision}</span>
         </div>
         <div class="svg-preview-wrap">
-          <div class="artwork-stage" aria-label={side === 'front' ? 'Card front' : 'Card back'}>
+          <div class="artwork-stage" class:dragging={Boolean(dragging)}
+            aria-label={side === 'front' ? 'Card front – drag a layer to move it' : 'Card back – drag a layer to move it'}
+            style:transform={`translate(${panX}px, ${panY}px) scale(${zoom})`}
+            onpointerdown={handlePointerDown} onpointermove={handlePointerMove}
+            onpointerup={handlePointerUp} onpointercancel={handlePointerCancel}>
             {@html previewSvg}
+          </div>
+        </div>
+        <div class="canvas-tools" aria-label="Canvas view controls">
+          <span>Tap a layer to select · drag to move · pinch to zoom</span>
+          <div class="zoom-controls">
+            <button type="button" aria-label="Zoom out" disabled={zoom <= 0.65}
+              onclick={() => (zoom = clampZoom(zoom - 0.25))}>−</button>
+            <output aria-label="Current zoom">{Math.round(zoom * 100)}%</output>
+            <button type="button" aria-label="Zoom in" disabled={zoom >= 3}
+              onclick={() => (zoom = clampZoom(zoom + 0.25))}>+</button>
+            <button type="button" aria-label="Reset zoom and pan"
+              onclick={resetCanvasView}>Reset</button>
           </div>
         </div>
         <div class="preview-switch" role="group" aria-label="Card side">
