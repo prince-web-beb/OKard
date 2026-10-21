@@ -5,7 +5,8 @@
 **Default branch:** main
 **Current phase:** Track 00.1 SOURCE IMPLEMENTED; package installation/build/tests and deployments NOT VERIFIED.
 **Implementation next item:** Complete Track 00.1 verification: lockfile, CI startup_failure, Replit build and real Android checks.
-**Architecture authority:** docs/OKARD_MASTER_IMPLEMENTATION_PLAN.md\n**Deployment authority:** docs/DEPLOYMENT_PROVIDERS.md and ADR 0001
+**Architecture authority:** docs/OKARD_MASTER_IMPLEMENTATION_PLAN.md
+**Deployment authority:** docs/DEPLOYMENT_PROVIDERS.md and ADR 0001
 
 ## User intent, in plain language
 
