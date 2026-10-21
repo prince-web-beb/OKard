@@ -10,6 +10,12 @@ A new **`/templates`** route now provides **18 original, separate card-family de
 
 **Important status:** Source is committed, but gallery build and Android browser checks are not yet proven. These cards are visual concepts, not approved credentials or paid/verified passes. See [Template Catalog Implementation](docs/TEMPLATE_CATALOG_IMPLEMENTATION.md) and [Progress Ledger](docs/IMPLEMENTATION_PROGRESS.md).
 
+## New: My Projects (device-first storage preview)
+
+`/projects` is now a real source-implemented project library powered by `@okard/project-library` (browser IndexedDB). A customer can start independently editable designs from any of the 18 registered families or HAMAD editions, search and flip their stored front/back scenes, rename, duplicate, open and delete projects, and return to `/lab?project=<id>` to edit and save. Project records use validation and a local conflict counter to avoid silent overwrites across tabs. Images remain session-only and are **never written into device projects**.
+
+**This is not account storage or cloud sync.** Clearing this browser's data can remove projects; export editable JSON separately. The code has been committed, but no successful complete app build/Android persistence E2E has yet been observed. See [Device Project Library Implementation](docs/PROJECT_LIBRARY_IMPLEMENTATION.md).
+
 ## Latest checkpoint — 21 October 2026
 
 **Worldwide phase update:** A reusable `@okard/country-data` package now contains 249 ISO 3166-1 country/territory codes with locale-aware names, BCP 47 formatting and RTL/LTR support. New Android-first `/countries` route provides search and safe design references, with actual `/lab?country=...&locale=...` metadata editing. Country-specific issuer/official ID layouts are **not** replicated. The new country code is committed but full build and Android QA remain unverified. Read `docs/WORLDWIDE_COUNTRY_REFERENCES.md`.
