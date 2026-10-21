@@ -202,7 +202,6 @@ export function parseCardDocument(input: string): CardDocument {
   assertCardDocument(raw);
   return raw;
 }
-const defaultDate = '2026-10-21T00:00:00.000Z';
 export function createEmptyCardDocument(options: {
   id: string; title: string; family: CardFamilyId;
   locale?: string; countryCode?: string | null; now?: string;
@@ -214,7 +213,7 @@ export function createEmptyCardDocument(options: {
     family: options.family,
     locale: options.locale ?? 'en',
     countryCode: options.countryCode ?? null,
-    updatedAt: options.now ?? defaultDate,
+    updatedAt: options.now ?? new Date().toISOString(),
     revision: 0,
     size: { widthMm: 85.6, heightMm: 53.98, bleedMm: 3 },
     artboards: { front: { side: 'front', nodes: [] }, back: { side: 'back', nodes: [] } },
@@ -319,7 +318,7 @@ const img = (name: string, x: number, y: number, w: number, h: number,
 /** Original private-brand visual template; NO issuer credential or legal identity claim. */
 export function createHamadCardDocument(
   edition: HamadEdition, displayName = 'HAMAD',
-  now = defaultDate,
+  now = new Date().toISOString(),
 ): CardDocument {
   const palette = palettes[edition];
   if (!palette) throw new CardSchemaError(['unknown HAMAD edition']);
