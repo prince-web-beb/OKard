@@ -8,6 +8,17 @@
 **Architecture authority:** docs/OKARD_MASTER_IMPLEMENTATION_PLAN.md
 **Deployment authority:** docs/DEPLOYMENT_PROVIDERS.md and ADR 0001
 
+## 2026-10-21 — OPENROUTER PRIMARY MODEL DIRECTIVE AND IMPLEMENTATION
+
+- **OpenRouter is primary for every OKard AI design call; Google Gemini is secondary fallback.** Replit remains primary frontend/backend host, Netlify alternative frontend, Google Cloud Run alternative API hosting.
+- Implemented `packages/ai-gateway/src/index.ts`: server-only configurable OpenRouter POST chat completions, direct Gemini generateContent secondary, typed normalized text/token result, bounded prompts/output/timeouts, fallback on retryable network/408/429/5xx/invalid response only, no fallback on 400/401/403/unconfigured primary.
+- Added `packages/ai-gateway/tests/gateway.test.mjs` (8 cases), package config, API factory `apps/api/src/ai.ts`, Hono read-only safe provider metadata (no key exposure), root dev build dependency and Google Cloud API Docker support. No public AI endpoint and no paid AI calls without authentication/quotas/consent/audit.
+- Added `docs/AI_PROVIDER_ROUTING.md` + ADR 0002 and server-only `OPENROUTER_API_KEY`/`OPENROUTER_MODEL` + `GOOGLE_GENERATIVE_AI_API_KEY`/`GOOGLE_MODEL` example vars.
+- Local self-contained gateway compiled with TypeScript 5.8.3 and passed 8 synthetic Node 22 tests. GitHub CI remains `startup_failure`; **committed full monorepo build not verified**; no live provider secrets or cloud deployment tested.
+- Replit exact app-name lookup `OKard` found no connected Replit application at this checkpoint; the owner intends to sync GitHub into Replit themselves.
+- **Next task:** online dependency install and lockfile, full typecheck/build/test, investigate GitHub Actions workflow startup failure, run authenticated/quota architecture before any real billable AI endpoint. Do not mark Track 00 or Track 10 complete yet.
+- **Mandatory:** inspect actual current repository commits, progress checklist and provider docs before new edits; don't confuse Google hosting with Google as second model provider.
+
 ## User intent, in plain language
 
 The owner wants **OKard Creator**, an original billion-dollar-quality **card creator website**, not an AI image-making chat and not just a HAMAD card. It must create, edit, save, reuse, preview and export many kinds of **front-and-back physical and digital private-brand cards** with high-end luxury design. A specific inspiration is previous portrait-heavy metallic marriage-member card front/back artwork; the actual platform must reproduce this quality through **code-based editable designs**. The owner studies visual designs first before implementing new kinds of card features. The owner specifically said **NO Next.js** and **Android must be first-class from day one**. Modern, stable programming tech, animation, professional layout, international references, AI tools in the roadmap, admin controls, no shortcuts, no fake workflows or unimplemented buttons.
