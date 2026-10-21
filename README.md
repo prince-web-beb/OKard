@@ -4,6 +4,12 @@
 
 **Deployment architecture:** Replit **primary** for web and backend; Netlify **alternative** web hosting; Google Cloud Run **secondary** API hosting. **OpenRouter is the PRIMARY AI model gateway, Google Gemini is SECONDARY AI fallback** (no paid AI endpoint enabled). No provider is claimed deployed by these source files. **Not Next.js.**
 
+## New: Template Gallery & Shared Studio (source checkpoint)
+
+A new **`/templates`** route now provides **18 original, separate card-family designs**—each with actual front and back derived from the same reusable scene graph. Gallery cards offer vector previews, Flip controls, category/search filtering, and direct **Customize design** links to **`/lab?template=<id>`**. The existing editor opens the selected card, supports family-specific fields, reverse inscription, photo only when applicable, editable layers and local-only drafts. Three original HAMAD editions remain in a dedicated collection.
+
+**Important status:** Source is committed, but gallery build and Android browser checks are not yet proven. These cards are visual concepts, not approved credentials or paid/verified passes. See [Template Catalog Implementation](docs/TEMPLATE_CATALOG_IMPLEMENTATION.md) and [Progress Ledger](docs/IMPLEMENTATION_PROGRESS.md).
+
 ## Latest checkpoint — 21 October 2026
 
 **Worldwide phase update:** A reusable `@okard/country-data` package now contains 249 ISO 3166-1 country/territory codes with locale-aware names, BCP 47 formatting and RTL/LTR support. New Android-first `/countries` route provides search and safe design references, with actual `/lab?country=...&locale=...` metadata editing. Country-specific issuer/official ID layouts are **not** replicated. The new country code is committed but full build and Android QA remain unverified. Read `docs/WORLDWIDE_COUNTRY_REFERENCES.md`.
