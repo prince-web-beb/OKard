@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@okard/shared": "workspace:*",
+    "@okard/ai-gateway": "workspace:*",
     "@hono/node-server": "^2.1.0",
     "hono": "^4.10.0"
   },
