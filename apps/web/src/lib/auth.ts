@@ -20,9 +20,9 @@ export function browserAuthConfigured(): boolean {
 export function getBrowserAuthManager():UserManager {
   if(!browserAuthConfigured())throw new Error('Secure sign-in is not configured for this deployment.');
   if(authManager)return authManager;
-  const authority=env.PUBLIC_OKARD_OIDC_ISSUER.trim().replace(/\/$/,'');
-  const client_id=env.PUBLIC_OKARD_OIDC_CLIENT_ID.trim();
-  const audience=env.PUBLIC_OKARD_OIDC_AUDIENCE.trim();
+  const authority=(env.PUBLIC_OKARD_OIDC_ISSUER ?? '').trim().replace(/\/$/,'');
+  const client_id=(env.PUBLIC_OKARD_OIDC_CLIENT_ID ?? '').trim();
+  const audience=(env.PUBLIC_OKARD_OIDC_AUDIENCE ?? '').trim();
   authManager=new UserManager({
     authority,client_id,response_type:'code',scope:'openid profile',
     redirect_uri:window.location.origin+'/auth/callback',
