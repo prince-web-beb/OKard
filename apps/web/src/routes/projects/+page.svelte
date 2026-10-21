@@ -20,6 +20,9 @@
   let error = $state('');
   let status = $state('');
   let projects = $state<LocalProject[]>([]);
+  let totalCount = $state(0);
+  let matchedCount = $state(0);
+  let loadSequence = 0;
   let selectedTemplate = $state('studio-identity');
   let projectName = $state('');
   let search = $state('');
@@ -28,20 +31,25 @@
   let editingName = $state('');
   let deletingId = $state<string | null>(null);
   let previewBack = $state<Record<string, boolean>>({});
-  const filtered = $derived(projects.filter((p) => p.name.toLocaleLowerCase()
-    .includes(search.trim().toLocaleLowerCase()) ||
-    p.design.family.includes(search.trim().toLocaleLowerCase())));
-  const shown = $derived(filtered.slice(0, visibleLimit));
+  const shown = $derived(projects);
 
   const friendlyError = (reason: unknown): string =>
     reason instanceof Error ? reason.message : 'Local project storage could not complete the request.';
 
   async function refresh() {
     if (!repository) return;
+    const sequence = ++loadSequence;
     const list = await repository.list();
-    // Load only visible cards to avoid loading 200 × up to 500KB into mobile memory.
-    const matching = list.slice(0, Math.max(visibleLimit, 12));
-    const details = await Promise.all(matching.map((item) => repository!.get(item.id)));
+    const query = search.trim().toLocaleLowerCase();
+    const matching = list.filter((item) => !query ||
+      item.name.toLocaleLowerCase().includes(query) ||
+      item.family.toLocaleLowerCase().includes(query));
+    // Only fetch the visible saved scenes; full metadata can be searched efficiently.
+    const visible = matching.slice(0, visibleLimit);
+    const details = await Promise.all(visible.map((item) => repository!.get(item.id)));
+    if (sequence !== loadSequence) return;
+    totalCount = list.length;
+    matchedCount = matching.length;
     projects = details.filter((item): item is LocalProject => item !== null);
   }
   onMount(() => {
@@ -163,11 +171,16 @@
             <span class="panel-topline">02 / DEVICE LIBRARY</span>
             <h2 id="saved-projects-heading">Saved creations.</h2>
           </div>
-          <span class="projects-count">{projects.length} loaded</span>
+          <span class="projects-count">{matchedCount} found · {totalCount} saved</span>
         </div>
         <label class="projects-search" for="projectFilter">Find a saved project
           <input id="projectFilter" type="search" autocomplete="off"
-            placeholder="Search project or card family" bind:value={search} />
+            placeholder="Search project or card family" value={search}
+            oninput={(event) => {
+              search = event.currentTarget.value;
+              visibleLimit = 12;
+              void refresh().catch((reason) => { error = friendlyError(reason); });
+            }} />
         </label>
         {#if error}
           <p role="alert" class="projects-feedback projects-error">{error}</p>
@@ -179,7 +192,7 @@
           <p class="projects-empty">Opening your device library…</p>
         {:else if projects.length === 0}
           <div class="projects-empty">
-            <h3>No projects yet.</h3>
+            <h3>{totalCount === 0 ? 'No projects yet.' : 'No matches found.'}</h3>
             <p>Your first card is one click away. Choose a design on the left, or explore the full gallery.</p>
             <a href="/templates">Browse template gallery ↗</a>
           </div>
@@ -237,7 +250,7 @@
               </article>
             {/each}
           </div>
-          {#if projects.length >= visibleLimit}
+          {#if matchedCount > visibleLimit}
             <button class="projects-load-more" disabled={busy} type="button"
               onclick={() => void showMore()}>Load more projects ↓</button>
           {/if}
